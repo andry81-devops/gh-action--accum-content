@@ -1,3 +1,6 @@
+2022.05.01:
+* fixed: action.yml: execution fixup
+
 2022.04.30:
 * changed: action.yml: implementation is reworked
 

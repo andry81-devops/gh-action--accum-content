@@ -132,8 +132,8 @@ jobs:
             ENABLE_GENERATE_CHANGELOG_FILE=1
             ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1
             CHANGELOG_FILE=repo/content-for-user/content-for-repo/content-changelog.txt
-            ENABLE_YAML_PRINT_AFTER_EDIT=1
             ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
+          #  ENABLE_YAML_PRINT_AFTER_EDIT=1
 ```
 
 > :information_source: You can use `secrets.READ_STATS_TOKEN` instead of `secrets.WRITE_STATS_TOKEN` as long as both repositories under the same repository owner.

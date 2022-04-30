@@ -102,11 +102,19 @@ runs:
         chmod ug+x $GH_WORKFLOW_ROOT/bash/github/print-notice.sh
         chmod ug+x $GH_WORKFLOW_ROOT/bash/cache/accum-content.sh
 
+    # step is required to pass environment variables externally
+    - name: declare variables from lists
+      shell: bash
+      run: |
+        $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
+          ${{ inputs.env }}
+
     - name: declare local variables
       shell: bash
       run: |
         $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
           "CHANGELOG_FILE=$GITHUB_WORKSPACE/content-cache/${{ env.CHANGELOG_FILE }}" \
+          "changelog_file_path=${{ env.CHANGELOG_FILE }}" \
           "content_config_file=$GITHUB_WORKSPACE/content-config/${{ inputs.content_config_file }}" \
           "content_index_file=$GITHUB_WORKSPACE/content-cache/${{ inputs.content_index_file }}" \
           "content_index_dir=${{ inputs.content_index_dir }}" \
@@ -116,8 +124,8 @@ runs:
       shell: bash
       run: |
         $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
-          "content_config_dir=$GITHUB_WORKSPACE/content-config/${content_config_file%/*}" \
-          "content_index_file_dir=$GITHUB_WORKSPACE/content-cache/${content_index_file%/*}" \
+          "content_config_dir=${content_config_file%/*}" \
+          "content_index_file_dir=${content_index_file%/*}" \
           "changelog_dir=${CHANGELOG_FILE%/*}"
 
     - name: allocate directories
@@ -133,7 +141,7 @@ runs:
           "content config file: https://github.com/${{ inputs.config_repo_owner }}/${{ inputs.config_repo }}/tree/${{ inputs.config_repo_branch }}/${{ inputs.content_config_file }}" \
           "content index file: https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/tree/${{ inputs.store_repo_branch }}/${{ inputs.content_index_file }}" \
           "content index dir: ${{ inputs.content_index_dir }}" \
-          "content changelog file: https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/tree/${{ inputs.store_repo_branch }}/${{ inputs.content_changelog_file }}"
+          "content changelog file: https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/tree/${{ inputs.store_repo_branch }}/${changelog_file_path:-'changelog.txt'}"
 
     - name: checkout content-config@${{ inputs.config_repo_branch }}
       uses: andry81-devops/gh-action--git-checkout@master
