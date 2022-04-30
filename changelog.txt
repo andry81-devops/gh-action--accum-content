@@ -1,0 +1,27 @@
+2022.04.30:
+* changed: action.yml: implementation is reworked
+
+2022.04.28:
+* changed: README.md: readme update
+
+2022.04.22:
+* changed: action.yml: code cleanup
+* changed: action.yml: minor refactor
+
+2022.04.19:
+* changed: README.md: readme update
+
+2022.04.16:
+* fixed: action.yml: `mkdir` in a working copy moved after git checkout instead of before to avoid accidental remove on cleanup
+* changed: action.yml: added `mkdir-p` parameter usage
+* changed: README.md: readme update
+
+2022.04.15:
+* changed: action.yml: switched to use `andry81-devops/gh-action--git-checkout` action instead of `actions/checkout`
+
+2022.04.15:
+* new: `README.md` readme file
+* new: `changelog.txt` changelog file
+* new: `userlog.md` userlog file
+* new: `license.txt` license file
+* new: action.yml: initial implementation

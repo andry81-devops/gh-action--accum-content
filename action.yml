@@ -1,0 +1,185 @@
+# Tutorial to use with: https://github.com/andry81-devops/accum-content
+#
+
+name: accum-content
+description: 'GitHub composite action to periodically download and accumulate content into repository'
+
+inputs:
+  deps_repo_owner:
+    description: 'Owner of a repository used to checkout dependencies'
+    required: true
+
+  deps_repo_branch:
+    description: 'Repository branch used to checkout dependencies'
+    default: master
+
+  deps_repo_read_token:
+    description: 'PAT token to a repository used to checkout dependencies'
+    default: ${{ github.token }}
+
+  config_repo_owner:
+    description: 'Owner of a repository used to read and execute content config file'
+    required: true
+
+  config_repo:
+    description: 'Repository name used to read and execute content config file'
+    required: true
+
+  config_repo_branch:
+    description: 'Repository branch used to read and execute content config file'
+    default: master
+
+  config_repo_read_token:
+    description: 'PAT token used to read content config file repository'
+    required: true
+
+  store_repo_owner:
+    description: 'Owner of a repository used to store content'
+    required: true
+
+  store_repo:
+    description: 'Repository name used to store content'
+    required: true
+
+  store_repo_branch:
+    description: 'Repository branch used to store content'
+    default: master
+
+  store_repo_write_token:
+    description: 'PAT token to the content store repository with write/push access rights'
+    required: true
+
+  content_config_file:
+    description: 'Content config file in the content config repository'
+    required: true
+
+  content_index_file:
+    description: 'Content index file in the content store repository'
+    required: true
+
+  content_index_dir:
+    description: 'Content index directory in the content store repository. If is not defined, then relative to content_index_file'
+
+  curl_flags:
+    description: 'additional curl flags'
+    # example:
+    #   `-H 'Cache-Control: no-cache'`
+
+  env:
+    description: environment variables
+    # See dependent repositories and scripts for details.
+    # examples:
+    #   ENABLE_GENERATE_CHANGELOG_FILE=1
+    #   ENABLE_PRINT_CURL_RESPONSE_ON_ERROR=1
+    #   ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1  # insert the time string in format HH:MMZ additionally after the date in each commit message
+    #   CHANGELOG_FILE=content/changelog.txt
+    #   ENABLE_YAML_DIFF_PRINT_ON_EDIT=1
+
+runs:
+  using: "composite"
+  steps:
+    # step is required to workaround variable expansion in variables
+    - name: declare dependent variables
+      shell: bash
+      run: |
+        echo "GH_WORKFLOW_ROOT=$GITHUB_WORKSPACE/gh-workflow" >> $GITHUB_ENV
+
+    - name: checkout gh-workflow@${{ inputs.deps_repo_branch }}
+      uses: andry81-devops/gh-action--git-checkout@master
+      with:
+        repository: ${{ inputs.deps_repo_owner }}/gh-workflow
+        ref:        ${{ inputs.deps_repo_branch }}
+        path:       gh-workflow
+        token:      ${{ inputs.deps_repo_read_token }}
+
+        mkdir-p: >-
+          ${{ env.GH_WORKFLOW_ROOT }}
+
+    - name: update permissions
+      shell: bash
+      run: |
+        chmod ug+x $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh
+        chmod ug+x $GH_WORKFLOW_ROOT/bash/github/print-notice.sh
+        chmod ug+x $GH_WORKFLOW_ROOT/bash/cache/accum-content.sh
+
+    - name: declare local variables
+      shell: bash
+      run: |
+        $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
+          "CHANGELOG_FILE=$GITHUB_WORKSPACE/content-cache/${{ env.CHANGELOG_FILE }}" \
+          "content_config_file=$GITHUB_WORKSPACE/content-config/${{ inputs.content_config_file }}" \
+          "content_index_file=$GITHUB_WORKSPACE/content-cache/${{ inputs.content_index_file }}" \
+          "content_index_dir=${{ inputs.content_index_dir }}" \
+          "curl_flags=${{ inputs.curl_flags }}"
+
+    - name: declare local variables
+      shell: bash
+      run: |
+        $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
+          "content_config_dir=$GITHUB_WORKSPACE/content-config/${content_config_file%/*}" \
+          "content_index_file_dir=$GITHUB_WORKSPACE/content-cache/${content_index_file%/*}" \
+          "changelog_dir=${CHANGELOG_FILE%/*}"
+
+    - name: allocate directories
+      shell: bash
+      run: |
+        $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
+          "WORKFLOW_TEMPDIR=$(mktemp -d)"
+
+    - name: head annotations
+      shell: bash
+      run: |
+        $GH_WORKFLOW_ROOT/bash/github/print-notice.sh \
+          "content config file: https://github.com/${{ inputs.config_repo_owner }}/${{ inputs.config_repo }}/tree/${{ inputs.config_repo_branch }}/${{ inputs.content_config_file }}" \
+          "content index file: https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/tree/${{ inputs.store_repo_branch }}/${{ inputs.content_index_file }}" \
+          "content index dir: ${{ inputs.content_index_dir }}" \
+          "content changelog file: https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/tree/${{ inputs.store_repo_branch }}/${{ inputs.content_changelog_file }}"
+
+    - name: checkout content-config@${{ inputs.config_repo_branch }}
+      uses: andry81-devops/gh-action--git-checkout@master
+      with:
+        repository: ${{ inputs.config_repo_owner }}/${{ inputs.config_repo }}
+        ref:        ${{ inputs.config_repo_branch }}
+        path:       content-config
+        token:      ${{ inputs.config_repo_read_token }}
+
+        mkdir-p: >-
+          ${{ env.content_config_dir }}
+
+    - name: checkout content-cache@${{ inputs.store_repo_branch }}
+      uses: andry81-devops/gh-action--git-checkout@master
+      with:
+        repository: ${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}
+        ref:        ${{ inputs.store_repo_branch }}
+        path:       content-cache
+        token:      ${{ inputs.store_repo_write_token }}
+
+        mkdir-p: >-
+          ${{ env.content_index_file_dir }}
+          ${{ env.content_index_dir }}
+          ${{ env.changelog_dir }}
+
+    - name: 'accumulate content using `${{ inputs.config_repo_dir }}/${{ inputs.config_repo_file }}` config'
+      id: accum-content
+      shell: bash
+      run: |
+        cd $GITHUB_WORKSPACE/content-cache
+        $GH_WORKFLOW_ROOT/bash/cache/accum-content.sh
+        # caution: no operation after that line if non zero exit code happens above
+
+    - name: commit content-cache
+      shell: bash
+      run: |
+        cd $GITHUB_WORKSPACE/content-cache
+        git add .
+        git config --global user.name "GitHub Action"
+        git config --global user.email "action@github.com"
+        git commit -m "A/U: $COMMIT_MESSAGE_DATE_TIME_PREFIX: $COMMIT_MESSAGE_SUFFIX"
+
+    - name: push board-stats
+      uses: ad-m/github-push-action@master
+      with:
+        repository:   ${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}
+        branch:       ${{ inputs.store_repo_branch }}
+        directory:    content-cache
+        github_token: ${{ inputs.store_repo_write_token }}
