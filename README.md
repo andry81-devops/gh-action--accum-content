@@ -38,7 +38,7 @@
   <a href="https://github.com/andry81-devops/gh-action--accum-content/blob/master/userlog.md">Userlog</a>
 • <a href="https://github.com/andry81-devops/gh-action--accum-content/blob/master/changelog.txt">Changelog</a>
 • <a href="#dependecies">Dependencies</a>
-• <a href="#known_issues">Known issues</a>
+• <a href="#known-issues">Known issues</a>
 • <a href="#copyright-and-license"><img src="https://github.com/andry81/andry81/raw/master/badges/mit-license.svg" valign="middle" alt="copyright and license" />&nbsp;Copyright and License</a>
 </p>
 
@@ -54,8 +54,9 @@ Tutorial to use with: https://github.com/andry81-devops/accum-content</h4>
 
 * Does store downloaded content in a repository on the GitHub, so all the resources does render from a repository file and does access a repository instead of an external resource, which:
 
-** reduces traffic to an external resource and avoids out-of-service case
-** does better cache on the GitHub side, when a resource can be checked on a cache expiration and so updated opposite to an external resource, where the resource has to be completely redownloaded
+  * Reduces traffic to an external resource and avoids an out-of-service case.
+
+  * Does better cache on the GitHub side, when a resource can be checked on a cache expiration and so updated opposite to an external resource, where the resource has to be completely redownloaded.
 
 * Content can be changed after download but before store in a repository. For example, for a SVG file - resized or cleanuped (not implemented).
 
@@ -116,13 +117,15 @@ jobs:
           store_repo_branch:        master
           store_repo_write_token:   ${{ secrets.READ_STATS_TOKEN }}
 
+          store_entity_path:        owner-of-content/repo-with-conent
+
           # config repo
-          content_config_file:      content-config.yml
+          content_config_file:      repo/owner-of-content/repo-with-conent/content-config.yml
 
           # store repo
-          content_index_file:       content-index.yml
+          content_index_file:       repo/owner-of-content/repo-with-conent/content-index.yml
 
-          content_index_dir:        repo/content-for-user/content-for-repo
+          content_index_dir:        repo/owner-of-content/repo-with-conent
 
           curl_flags: >-
             -H 'Cache-Control: no-cache'
@@ -131,7 +134,7 @@ jobs:
           env: >-
             ENABLE_GENERATE_CHANGELOG_FILE=1
             ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1
-            CHANGELOG_FILE=repo/content-for-user/content-for-repo/content-changelog.txt
+            CHANGELOG_FILE=repo/owner-of-content/repo-with-conent/content-changelog.txt
             ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
           #  ENABLE_YAML_PRINT_AFTER_EDIT=1
 ```
