@@ -133,12 +133,6 @@ runs:
           "content_index_file_dir=${content_index_file%/*}" \
           "changelog_dir=${CHANGELOG_FILE%/*}"
 
-    - name: allocate directories
-      shell: bash
-      run: |
-        $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
-          "WORKFLOW_TEMPDIR=$(mktemp -d)"
-
     - name: head annotations
       shell: bash
       run: |
