@@ -117,15 +117,15 @@ jobs:
           store_repo_branch:        master
           store_repo_write_token:   ${{ secrets.READ_STATS_TOKEN }}
 
-          store_entity_path:        owner-of-content/repo-with-conent
+          store_entity_path:        owner-of-content/repo-with-content
 
           # config repo
-          content_config_file:      repo/owner-of-content/repo-with-conent/content-config.yml
+          content_config_file:      repo/owner-of-content/repo-with-content/content-config.yml
 
           # store repo
-          content_index_file:       repo/owner-of-content/repo-with-conent/content-index.yml
+          content_index_file:       repo/owner-of-content/repo-with-content/content-index.yml
 
-          content_index_dir:        repo/owner-of-content/repo-with-conent
+          content_index_dir:        repo/owner-of-content/repo-with-content
 
           curl_flags: >-
             -H 'Cache-Control: no-cache'
@@ -134,7 +134,7 @@ jobs:
           env: >-
             ENABLE_GENERATE_CHANGELOG_FILE=1
             ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1
-            CHANGELOG_FILE=repo/owner-of-content/repo-with-conent/content-changelog.txt
+            CHANGELOG_FILE=repo/owner-of-content/repo-with-content/content-changelog.txt
             ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
             CONTINUE_ON_EMPTY_CHANGES=1
             ERROR_ON_EMPTY_CHANGES_WITHOUT_ERRORS=1

@@ -1,4 +1,7 @@
 2022.05.06:
+* changed: README.md: readme update
+
+2022.05.06:
 * fixed: action.yml: `CHANGELOG_FILE` must be always not empty
 * changed: action.yml: minor changes
 * changed: README.md: readme update
