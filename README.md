@@ -125,7 +125,7 @@ jobs:
           store_repo_branch:        master
           store_repo_write_token:   ${{ secrets.READ_STATS_TOKEN }}
 
-          store_entity_path:        owner-of-content/repo-with-content
+          commit_msg_entity:        my-store-dir-1
 
           # config repo
           content_config_file:      repo/owner-of-content/repo-with-content/content-config.yml

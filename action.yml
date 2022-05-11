@@ -49,9 +49,11 @@ inputs:
     description: 'PAT token to the content store repository with write/push access rights'
     required: true
 
-  store_entity_path:
-    description: 'Named content store entity path. Useful to distinguish different storages in a single repository in case of a shared store between multiple composite actions.'
-    required: false
+  commit_msg_entity:
+    description: 'Commit message entity'
+    # examples:
+    # - my-store-dir-1
+    # - my-store-dir-2
 
   content_config_file:
     description: 'Content config file in the content config repository'
@@ -126,7 +128,7 @@ runs:
       run: |
         $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
           "CHANGELOG_FILE=$GITHUB_WORKSPACE/content-cache/$CHANGELOG_FILE" \
-          "store_entity_path=${{ inputs.store_entity_path }}" \
+          "commit_msg_entity=${{ inputs.commit_msg_entity }}" \
           "content_config_file=$GITHUB_WORKSPACE/content-config/${{ inputs.content_config_file }}" \
           "content_index_file=$GITHUB_WORKSPACE/content-cache/${{ inputs.content_index_file }}" \
           "content_index_dir=${{ inputs.content_index_dir }}" \
@@ -188,7 +190,7 @@ runs:
         git add .
         git config --global user.name "GitHub Action"
         git config --global user.email "action@github.com"
-        git commit -m "A/U: $COMMIT_MESSAGE_DATE_TIME_PREFIX: ${COMMIT_MESSAGE_PREFIX}${COMMIT_MESSAGE_PREFIX:+" | "}$COMMIT_MESSAGE_SUFFIX"
+        git commit -m "A/U: $COMMIT_MESSAGE_DATE_TIME_PREFIX: ${COMMIT_MESSAGE_PREFIX}${COMMIT_MESSAGE_SUFFIX:+" | "}$COMMIT_MESSAGE_SUFFIX"
 
     - name: push board-stats
       uses: ad-m/github-push-action@master
