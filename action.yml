@@ -82,6 +82,7 @@ inputs:
     #   ENABLE_YAML_DIFF_PRINT_ON_EDIT=1
     #   CONTINUE_ON_EMPTY_CHANGES=1
     #   ERROR_ON_EMPTY_CHANGES_WITHOUT_ERRORS=1
+    #   NO_SKIP_UNEXPIRED_ENTRIES=1
 
 runs:
   using: "composite"
@@ -122,6 +123,10 @@ runs:
       run: |
         $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
           "CHANGELOG_FILE=${CHANGELOG_FILE:-"changelog.txt"}"
+        if (( ! NO_SKIP_UNEXPIRED_ENTRIES )) && [[ "${{ github.event.inputs.no_skip_unexpired_entries }}" == 'true' || "${{ github.event.inputs.no_skip_unexpired_entries }}" -ne 0 ]]; then
+          $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
+            "NO_SKIP_UNEXPIRED_ENTRIES=1"
+        fi
 
     - name: declare local variables
       shell: bash

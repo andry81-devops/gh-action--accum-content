@@ -64,7 +64,7 @@ Tutorial to use with: https://github.com/andry81-devops/accum-content</h4>
 
   * Reduces traffic to an external resource and avoids an out-of-service case.
 
-  * Does better cache on the GitHub side, when a resource can be checked on a cache expiration and so updated opposite to an external resource, where the resource has to be completely redownloaded.
+  * Does better cache on the GitHub side, when a resource can be checked on a cache expiration and so updated opposite to an external resource, where the resource is relied on external caching and has to be completely redownloaded.
 
 * Content can be changed after download but before store in a repository. For example, for a SVG file - resized or cleanuped (not implemented).
 
@@ -80,9 +80,13 @@ Tutorial to use with: https://github.com/andry81-devops/accum-content</h4>
 
 * The script can skip warnings and errors (`CONTINUE_ON_INVALID_INPUT=1`, `CONTINUE_ON_EMPTY_CHANGES=1`)
 
+* The script can skip not yet expired entries and force them to download (`NO_SKIP_UNEXPIRED_ENTRIES=1`)
+
 * The script can generate textual changelog file with notes about changes per commit (including changes absence in case of skipped errors or skipped content update; `ENABLE_GENERATE_CHANGELOG_FILE=1`, `CHANGELOG_FILE=".../content-changelog.txt"`)
 
 * The script can insert the time string in format `HH:MMZ` additionally after the date in each commit message (by default inserts only a date for shorter commit messages; `ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1`)
+
+* The script by default does generate the content index file `content-index.yml` from the content config file `content-config.yml` if not found.
 
 # USAGE
 
@@ -103,6 +107,11 @@ on:
     - cron: "0 */3 * * *"
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      no_skip_unexpired_entries:
+        description: 'Do not skip unexpired entries'
+        required: true
+        default: 'false'
 
 jobs:
   accum-content-cache:
@@ -147,11 +156,12 @@ jobs:
             CONTINUE_ON_EMPTY_CHANGES=1
             ERROR_ON_EMPTY_CHANGES_WITHOUT_ERRORS=1
           #  ENABLE_YAML_PRINT_AFTER_EDIT=1
+          #  NO_SKIP_UNEXPIRED_ENTRIES=1
 ```
 
 > :information_source: You can use `secrets.READ_STATS_TOKEN` instead of `secrets.WRITE_STATS_TOKEN` as long as both repositories under the same repository owner.
 
-> :warning: You must use different values for `deps_repo_owner` and `output_repo_owner` if respective repositories actually under different repository owners.
+> :warning: You must use different values for `deps_repo_owner`, `config_repo_owner` and `store_repo_owner` if respective repositories actually under different repository owners.
 
 > :information_source: See <a href="https://github.com/andry81-devops/github-accum-stats#reuse">REUSE</a> section for details if you have multiple repositories and want to store all GitHub workflow scripts (`.github/workflows/*.yml`) in a single repository.
 
