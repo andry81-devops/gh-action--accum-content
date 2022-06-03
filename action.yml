@@ -132,6 +132,7 @@ runs:
       shell: bash
       run: |
         $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
+          "changelog_file=$CHANGELOG_FILE" \
           "CHANGELOG_FILE=$GITHUB_WORKSPACE/content-cache/$CHANGELOG_FILE" \
           "commit_msg_entity=${{ inputs.commit_msg_entity }}" \
           "content_config_file=$GITHUB_WORKSPACE/content-config/${{ inputs.content_config_file }}" \
@@ -154,7 +155,7 @@ runs:
           "content config file: https://github.com/${{ inputs.config_repo_owner }}/${{ inputs.config_repo }}/tree/${{ inputs.config_repo_branch }}/${{ inputs.content_config_file }}" \
           "content index file: https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/tree/${{ inputs.store_repo_branch }}/${{ inputs.content_index_file }}" \
           "content index dir: ${{ inputs.content_index_dir }}" \
-          "content changelog file: https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/tree/${{ inputs.store_repo_branch }}/$CHANGELOG_FILE"
+          "content changelog file: https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/tree/${{ inputs.store_repo_branch }}/$changelog_file"
 
     - name: checkout content-config@${{ inputs.config_repo_branch }}
       uses: andry81-devops/gh-action--git-checkout@master

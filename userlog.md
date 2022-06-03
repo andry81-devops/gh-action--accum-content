@@ -2,6 +2,9 @@
 
 > :warning: to find all changes use [changelog.txt](https://github.com/andry81-devops/gh-action--accum-content/blob/master/changelog.txt) file in a directory
 
+## 2022.06.03:
+* fixed: action.yml: `content changelog file` invalid path notice
+
 ## 2022.05.12:
 * new: action.yml: added `NO_SKIP_UNEXPIRED_ENTRIES` environment variable and check for `no_skip_unexpired_entries` of workflow dispatch input parameter to avoid skip of unexpired entries
 
