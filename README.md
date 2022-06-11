@@ -62,6 +62,8 @@ Tutorial to use with: https://github.com/andry81-devops/accum-content</h4>
 
 * Does store downloaded content in a repository on the GitHub, so all the resources does render from a repository file and does access a repository instead of an external resource, which:
 
+  * Prevents a broken link case holding at the same time the link content up to date and has option to roll back the content to previous version in case of broken or invalid content (if history was not rewrited and purged).
+
   * Reduces traffic to an external resource and avoids an out-of-service case.
 
   * Does better cache on the GitHub side, when a resource can be checked on a cache expiration and so updated opposite to an external resource, where the resource is relied on external caching and has to be completely redownloaded.
@@ -82,11 +84,12 @@ Tutorial to use with: https://github.com/andry81-devops/accum-content</h4>
 
 * The script can skip not yet expired entries and force them to download (`NO_SKIP_UNEXPIRED_ENTRIES=1`)
 
-* The script can generate textual changelog file with notes about changes per commit (including changes absence in case of skipped errors or skipped content update; `ENABLE_GENERATE_CHANGELOG_FILE=1`, `CHANGELOG_FILE=".../content-changelog.txt"`)
+* The script does use content index file `content-index.yml` to control the up to date and by default does generate the content index file from the content config file `content-config.yml` if does not exist.
+
+* The script can generate a textual changelog file with notes about changes per commit (including changes absence in case of skipped errors or skipped content update; `ENABLE_GENERATE_CHANGELOG_FILE=1`, `CHANGELOG_FILE=".../content-changelog.txt"`)
 
 * The script can insert the time string in format `HH:MMZ` additionally after the date in each commit message (by default inserts only a date for shorter commit messages; `ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1`)
 
-* The script by default does generate the content index file `content-index.yml` from the content config file `content-config.yml` if not found.
 
 # USAGE
 
