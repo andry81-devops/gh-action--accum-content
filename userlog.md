@@ -2,6 +2,9 @@
 
 > :warning: to find all changes use [changelog.txt](https://github.com/andry81-devops/gh-action--accum-content/blob/master/changelog.txt) file in a directory
 
+## 2022.08.09:
+* new: action.yml: print commit reference url to the log
+
 ## 2022.06.03:
 * fixed: action.yml: `content changelog file` invalid path notice
 
