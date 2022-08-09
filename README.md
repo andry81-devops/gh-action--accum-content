@@ -156,9 +156,11 @@ jobs:
             ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1
             CHANGELOG_FILE=repo/owner-of-content/repo-with-content/content-changelog.txt
             ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
+            ENABLE_YAML_DIFF_PRINT_BEFORE_PATCH=1
             CONTINUE_ON_EMPTY_CHANGES=1
             ERROR_ON_EMPTY_CHANGES_WITHOUT_ERRORS=1
           #  ENABLE_YAML_PRINT_AFTER_EDIT=1
+          #  ENABLE_YAML_PRINT_AFTER_PATCH=1
           #  NO_SKIP_UNEXPIRED_ENTRIES=1
 ```
 
