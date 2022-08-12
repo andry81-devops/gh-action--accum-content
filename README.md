@@ -54,6 +54,8 @@
 <br/>
 Tutorial to use with: https://github.com/andry81-devops/accum-content</h4>
 
+All tutorials: https://github.com/andry81/index#tutorials
+
 ##
 
 # gh-action--accum-content@master
