@@ -82,15 +82,20 @@ All tutorials: https://github.com/andry81/index#tutorials
 * The script does accumulate content into a repository and does update the content index file:
   `content-index.yml`
 
-* The script can skip warnings and errors (`CONTINUE_ON_INVALID_INPUT=1`, `CONTINUE_ON_EMPTY_CHANGES=1`)
 
-* The script can skip not yet expired entries and force them to download (`NO_SKIP_UNEXPIRED_ENTRIES=1`)
+**Functionality of the script**:
 
-* The script does use content index file `content-index.yml` to control the up to date and by default does generate the content index file from the content config file `content-config.yml` if does not exist.
+* Can skip warnings and errors (`CONTINUE_ON_INVALID_INPUT=1`, `CONTINUE_ON_EMPTY_CHANGES=1`)
 
-* The script can generate a textual changelog file with notes about changes per commit (including changes absence in case of skipped errors or skipped content update; `ENABLE_GENERATE_CHANGELOG_FILE=1`, `CHANGELOG_FILE=".../content-changelog.txt"`)
+* Can skip not yet expired entries and continue on to download (`NO_SKIP_UNEXPIRED_ENTRIES=1`)
 
-* The script can insert the time string in format `HH:MMZ` additionally after the date in each commit message (by default inserts only a date for shorter commit messages; `ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1`)
+* Can skip entries download (`NO_DOWNLOAD_ENTRIES=1`, `NO_DOWNLOAD_ENTRIES_AND_CREATE_EMPTY_INSTEAD=1`)
+
+* Does use content index file `content-index.yml` to control the up to date and by default does generate the content index file from the content config file `content-config.yml` if does not exist.
+
+* Can generate a textual changelog file with notes about changes per commit (including changes absence in case of skipped errors or skipped content update; `ENABLE_GENERATE_CHANGELOG_FILE=1`, `CHANGELOG_FILE=".../content-changelog.txt"`)
+
+* Can insert the time string in format `HH:MMZ` additionally after the date in each commit message (by default inserts only a date for shorter commit messages; `ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1`)
 
 
 # USAGE
@@ -155,15 +160,18 @@ jobs:
 
           env: >-
             ENABLE_GENERATE_CHANGELOG_FILE=1
-            ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1
+            ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1  # insert the time string in format HH:MMZ additionally after the date in each commit message
             CHANGELOG_FILE=repo/owner-of-content/repo-with-content/content-changelog.txt
-            ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
-            ENABLE_YAML_DIFF_PRINT_BEFORE_PATCH=1
             CONTINUE_ON_EMPTY_CHANGES=1
             ERROR_ON_EMPTY_CHANGES_WITHOUT_ERRORS=1
           #  ENABLE_YAML_PRINT_AFTER_EDIT=1
           #  ENABLE_YAML_PRINT_AFTER_PATCH=1
+          #  ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
+          #  ENABLE_YAML_DIFF_PRINT_BEFORE_PATCH=1
+          #  ENABLE_YAML_PATCH_DIFF_PAUSE_MODE=1
           #  NO_SKIP_UNEXPIRED_ENTRIES=1
+          #  NO_DOWNLOAD_ENTRIES=1
+          #  NO_DOWNLOAD_ENTRIES_AND_CREATE_EMPTY_INSTEAD=1
 ```
 
 > **Note** You can use `secrets.READ_STATS_TOKEN` instead of `secrets.WRITE_STATS_TOKEN` as long as both repositories under the same repository owner.

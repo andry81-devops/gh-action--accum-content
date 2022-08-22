@@ -76,13 +76,18 @@ inputs:
     # See dependent repositories and scripts for details.
     # examples:
     #   ENABLE_GENERATE_CHANGELOG_FILE=1
-    #   ENABLE_PRINT_CURL_RESPONSE_ON_ERROR=1
     #   ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1  # insert the time string in format HH:MMZ additionally after the date in each commit message
-    #   CHANGELOG_FILE=content/changelog.txt
-    #   ENABLE_YAML_DIFF_PRINT_ON_EDIT=1
+    #   CHANGELOG_FILE=repo/owner-of-content/repo-with-content/content-changelog.txt
+    #   ENABLE_YAML_PRINT_AFTER_EDIT=1
+    #   ENABLE_YAML_PRINT_AFTER_PATCH=1
+    #   ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
+    #   ENABLE_YAML_DIFF_PRINT_BEFORE_PATCH=1
+    #   ENABLE_YAML_PATCH_DIFF_PAUSE_MODE=1
     #   CONTINUE_ON_EMPTY_CHANGES=1
     #   ERROR_ON_EMPTY_CHANGES_WITHOUT_ERRORS=1
     #   NO_SKIP_UNEXPIRED_ENTRIES=1
+    #   NO_DOWNLOAD_ENTRIES=1
+    #   NO_DOWNLOAD_ENTRIES_AND_CREATE_EMPTY_INSTEAD=1
 
 runs:
   using: "composite"
