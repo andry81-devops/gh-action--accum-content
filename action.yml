@@ -88,6 +88,7 @@ inputs:
     #   NO_SKIP_UNEXPIRED_ENTRIES=1
     #   NO_DOWNLOAD_ENTRIES=1
     #   NO_DOWNLOAD_ENTRIES_AND_CREATE_EMPTY_INSTEAD=1
+    #   ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1
 
 runs:
   using: "composite"
@@ -122,7 +123,8 @@ runs:
       shell: bash
       run: |
         $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
-          ${{ inputs.env }}
+          ${{ inputs.env }} \
+          "GHWF_GITHUB_ACTIONS_RUN_URL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
     - name: variables validation
       shell: bash
