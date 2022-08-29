@@ -89,6 +89,8 @@ inputs:
     #   NO_DOWNLOAD_ENTRIES=1
     #   NO_DOWNLOAD_ENTRIES_AND_CREATE_EMPTY_INSTEAD=1
     #   ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1
+    #   USE_PYTHON3_PIP_INSTALL_CMDLINE="<pip-install-cmdline>"
+    #   USE_APT_GET_INSTALL_CMDLINE="<apt-get-install-cmdline>"
 
 runs:
   using: "composite"
@@ -126,6 +128,38 @@ runs:
           ${{ inputs.env }} \
           "GHWF_GITHUB_ACTIONS_RUN_URL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
+    - name: install apt-get prerequisites
+      shell: bash
+      run: |
+        if [[ -n "$USE_APT_GET_INSTALL_CMDLINE" ]]; then
+          function call()
+          {
+            echo ">$@"
+            "$@"
+          }
+          
+          while IFS=$'\n' read -r line; do
+            call sudo apt-get install $line
+            echo '---'
+          done <<< "$USE_APT_GET_INSTALL_CMDLINE"
+        fi
+
+    - name: install python prerequisites
+      shell: bash
+      run: |
+        if [[ -n "$USE_PYTHON3_PIP_INSTALL_CMDLINE" ]]; then
+          function call()
+          {
+            echo ">$@"
+            "$@"
+          }
+          
+          while IFS=$'\n' read -r line; do
+            python3 -m pip install $line
+            echo '---'
+          done <<< "$USE_PYTHON3_PIP_INSTALL_CMDLINE"
+        fi
+
     - name: variables validation
       shell: bash
       run: |
@@ -134,6 +168,10 @@ runs:
         if (( ! NO_SKIP_UNEXPIRED_ENTRIES )) && [[ "${{ github.event.inputs.no_skip_unexpired_entries }}" == 'true' || "${{ github.event.inputs.no_skip_unexpired_entries }}" -ne 0 ]]; then
           $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
             "NO_SKIP_UNEXPIRED_ENTRIES=1"
+        fi
+        if (( ! NO_DOWNLOAD_ENTRIES )) && [[ "${{ github.event.inputs.no_download_entries }}" == 'true' || "${{ github.event.inputs.no_download_entries }}" -ne 0 ]]; then
+          $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
+            "NO_DOWNLOAD_ENTRIES=1"
         fi
 
     - name: declare local variables
