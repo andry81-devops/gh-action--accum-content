@@ -95,6 +95,11 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: install packages with caching
+      uses: andry81-forks/cache-apt-pkgs-action@latest
+      with:
+        packages: xmlstarlet
+
     # step is required to workaround variable expansion in variables
     - name: declare dependent variables
       shell: bash

@@ -97,6 +97,14 @@ All tutorials: https://github.com/andry81/index#tutorials
 
 * Can insert the time string in format `HH:MMZ` additionally after the date in each commit message (by default inserts only a date for shorter commit messages; `ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1`)
 
+* Can print GitHub Actions Run URL into changelog (`ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1`)
+
+* Can use download validation scrtips to run validation code after a file download (see `content-config.yml` example below)
+
+* Can install `apt-get` and `python3` packages and modules before use (`USE_APT_GET_INSTALL_CMDLINE="<apt-get-install-cmdline>"`, `USE_PYTHON3_PIP_INSTALL_CMDLINE="<pip-install-cmdline>"`)
+
+  > **Note** This is mostly for the testing purposes. In case of slow installation of many dependencies, packages or modules you have to use an installation together with the caching feature.
+  > See available list of solutions from here: https://stackoverflow.com/questions/59269850/caching-apt-packages-in-github-actions-workflow/73500415#73500415
 
 # USAGE
 
@@ -106,6 +114,161 @@ All tutorials: https://github.com/andry81/index#tutorials
 * `{{REPO}}` -> your repository
 
 ## Examples:
+
+<a name="content-config.yml">`{{REPO_OWNER}}/gh-content-cache-config/raw/master/repo/{{REPO_OWNER}}/{{REPO}}/content-config.yml`</a>:
+
+```yml
+content-config:
+
+  entries:
+
+    - init:
+        #shell: bash
+        ## Input variables:
+        ##   GH_WORKFLOW_ROOT
+        ##
+        ## CAUTION:
+        ##   First line must be a shebang line, otherwise each script line will run in a child bash process!
+        ##
+        #run: |
+        #  #!/bin/bash
+        #  exit 0
+
+      download-validate:
+        # required
+        dir-match-paths: |
+          badges/*
+        # optional
+        xpath-match-tokens: |
+          svg/g[1]/text[3]
+        
+        shell: bash
+        # Input variables:
+        #   GH_WORKFLOW_ROOT,
+        #   IS_STORED_FILE_EXIST, STORED_FILE, STORED_FILE_SIZE, STORED_FILE_HASH,
+        #   DOWNLOADED_FILE, DOWNLOADED_FILE_SIZE, DOWNLOADED_FILE_HASH,
+        #   XPATH_MATCH_TOKENS
+        #
+        # CAUTION:
+        #   First line must be a shebang line, otherwise each script line will run in a child bash process!
+        #
+        run: |
+          #!/bin/bash
+          
+          # validate download unconditionally on first time download
+          (( ! IS_STORED_FILE_EXIST )) && return 0
+          
+          source "$GH_WORKFLOW_ROOT/_externals/tacklelib/bash/tacklelib/bash_tacklelib" || exit 255
+          
+          tkl_include_or_abort "$GH_WORKFLOW_ROOT/bash/github/init-xq-workflow.sh"
+          
+          XPATH_TOKEN="${XPATH_MATCH_TOKENS[0]}"
+          
+          if (( ${#XQ_CMDLINE_READ[@]} )); then
+            # replace all `/` by `.`
+            XPATH_TOKEN="${XPATH_TOKEN////.}"
+            IFS=$'\n' read -r value <<< "$("${XQ_CMDLINE_READ[@]}" '.$XPATH_TOKEN."#text"' "$DOWNLOADED_FILE")" || exit 255
+          elif (( ${#XMLSTARLET_CMDLINE_SEL[@]} )); then
+            # increment all array indexes, because xpath array index must start from 1 instead of 0
+            XPATH_TOKEN="$(perl -pe 's/\[(\d+)\]/"[".($1+1)."]"/ge' <<< "$XPATH_TOKEN")"
+            # workaround xmlstarlet svg file parse by removing all attributes from the `svg` tag
+            value="$(sed 's/<svg [^>]*/<svg/' "$DOWNLOADED_FILE" | "${XMLSTARLET_CMDLINE_SEL[@]}" -t -v "//$XPATH_TOKEN")" || exit 255
+          else
+            exit 255
+          fi
+          
+          value="${value//[ $'\t'a-zA-Z]/}"
+          value_int="${value%.*}"
+          value_fract="${value#*.}"
+          [[ "$value_fract" == "$value" ]] && value_fract=0
+          (( value_int || value_fract )) && exit 0
+          
+          exit 255
+
+      dirs:
+
+        - dir:            badges/traffic/views
+          schedule:
+            next-update:
+              timestamp: 04:00Z
+
+          xpath-match-tokens: |
+            svg/g[1]/text[3]
+
+          files:
+
+            - file:       all.svg
+              query-url:  https://img.shields.io/badge/dynamic/json?color=success&label=views|all&query=count&url=https://github.com/andry81-stats/{{REPO}}--gh-stats/raw/master/traffic/views/latest-accum.json?raw=True&logo=github
+
+            - file:       all-14d.svg
+              query-url:  https://img.shields.io/badge/dynamic/json?color=success&label=14d&query=count&url=https://github.com/andry81-stats/{{REPO}}--gh-stats/raw/master/traffic/views/latest.json?raw=True
+
+            - file:       unq.svg
+              query-url:  https://img.shields.io/badge/dynamic/json?color=success&label=views|unq&query=uniques&url=https://github.com/andry81-stats/{{REPO}}--gh-stats/raw/master/traffic/views/latest-accum.json?raw=True&logo=github
+
+            - file:       unq-14d.svg
+              query-url:  https://img.shields.io/badge/dynamic/json?color=success&label=14d&query=uniques&url=https://github.com/andry81-stats/{{REPO}}--gh-stats/raw/master/traffic/views/latest.json?raw=True
+
+        - dir:            badges/traffic/clones
+          schedule:
+            next-update:
+              timestamp: 04:00Z
+
+          xpath-match-tokens: |
+            svg/g[1]/text[3]
+
+          files:
+
+            - file:       all.svg
+              query-url:  https://img.shields.io/badge/dynamic/json?color=success&label=clones|all&query=count&url=https://github.com/andry81-stats/{{REPO}}--gh-stats/raw/master/traffic/clones/latest-accum.json?raw=True&logo=github
+
+            - file:       all-14d.svg
+              query-url:  https://img.shields.io/badge/dynamic/json?color=success&label=14d&query=count&url=https://github.com/andry81-stats/{{REPO}}--gh-stats/raw/master/traffic/clones/latest.json?raw=True
+
+            - file:       unq.svg
+              query-url:  https://img.shields.io/badge/dynamic/json?color=success&label=clones|unq&query=uniques&url=https://github.com/andry81-stats/{{REPO}}--gh-stats/raw/master/traffic/clones/latest-accum.json?raw=True&logo=github
+
+            - file:       unq-14d.svg
+              query-url:  https://img.shields.io/badge/dynamic/json?color=success&label=14d&query=uniques&url=https://github.com/andry81-stats/{{REPO}}--gh-stats/raw/master/traffic/clones/latest.json?raw=True
+
+        - dir:            badges/metrics
+          schedule:
+            next-update:
+              timestamp: 08:00Z
+
+          files:
+
+            - file:       commits-since-latest.svg
+              query-url:  https://img.shields.io/github/commits-since/{{REPO_OWNER}}/{{REPO}}/latest?sort=semver&label=Github%20commits%20since%20latest
+
+            - file:       latest-release-name.svg
+              query-url:  https://img.shields.io/github/v/release/{{REPO_OWNER}}/{{REPO}}?include_prereleases&label=latest
+
+            - file:       github-all-releases.svg
+              query-url:  https://img.shields.io/github/downloads/{{REPO_OWNER}}/{{REPO}}/total?label=Github%20dl|all&logo=github
+
+        - dir:            badges/metrics
+          schedule:
+            next-update:
+              timestamp: 08:00Z
+
+          xpath-match-tokens: |
+            svg/g[1]/text[3]
+
+          files:
+
+            - file:       shields-repo-size.svg
+              query-url:  https://img.shields.io/github/repo-size/{{REPO_OWNER}}/{{REPO}}?logo=github
+
+            - file:       shields-code-size.svg
+              query-url:  https://img.shields.io/github/languages/code-size/{{REPO_OWNER}}/{{REPO}}?logo=github
+
+            - file:       tokei-lines-of-code.svg
+              query-url:  https://tokei.rs/b1/github/{{REPO_OWNER}}/{{REPO}}?category=code
+
+            #- file:       tokei-lines.svg
+            #  query-url:  https://img.shields.io/tokei/lines/github/{{REPO_OWNER}}/{{REPO}}?logo=tokei
+```
 
 <a name="accum-content-yml">`.github/workflows/accum-content.yml`</a>:
 
@@ -118,9 +281,14 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
+      # for tests
       no_skip_unexpired_entries:
         description: 'Do not skip unexpired entries'
-        required: true
+        required: false
+        default: 'false'
+      no_download_entries:
+        description: 'Do not download entries'
+        required: false
         default: 'false'
 
 jobs:
@@ -147,12 +315,12 @@ jobs:
           commit_msg_entity:        my-store-dir-1
 
           # config repo
-          content_config_file:      repo/owner-of-content/repo-with-content/content-config.yml
+          content_config_file:      repo/{{REPO_OWNER}}/{{REPO}}/content-config.yml
 
           # store repo
-          content_index_file:       repo/owner-of-content/repo-with-content/content-index.yml
+          content_index_file:       repo/{{REPO_OWNER}}/{{REPO}}/content-index.yml
 
-          content_index_dir:        repo/owner-of-content/repo-with-content
+          content_index_dir:        repo/{{REPO_OWNER}}/{{REPO}}
 
           curl_flags: >-
             -H 'Cache-Control: no-cache'
@@ -161,17 +329,20 @@ jobs:
           env: >-
             ENABLE_GENERATE_CHANGELOG_FILE=1
             ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1  # insert the time string in format HH:MMZ additionally after the date in each commit message
-            CHANGELOG_FILE=repo/owner-of-content/repo-with-content/content-changelog.txt
+            CHANGELOG_FILE=repo/{{REPO_OWNER}}/{{REPO}}/content-changelog.txt
+            ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
+            ENABLE_YAML_DIFF_PRINT_BEFORE_PATCH=1
             CONTINUE_ON_EMPTY_CHANGES=1
             ERROR_ON_EMPTY_CHANGES_WITHOUT_ERRORS=1
+            ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1
           #  ENABLE_YAML_PRINT_AFTER_EDIT=1
           #  ENABLE_YAML_PRINT_AFTER_PATCH=1
-          #  ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
-          #  ENABLE_YAML_DIFF_PRINT_BEFORE_PATCH=1
           #  ENABLE_YAML_PATCH_DIFF_PAUSE_MODE=1
           #  NO_SKIP_UNEXPIRED_ENTRIES=1
           #  NO_DOWNLOAD_ENTRIES=1
           #  NO_DOWNLOAD_ENTRIES_AND_CREATE_EMPTY_INSTEAD=1
+          #  "USE_APT_GET_INSTALL_CMDLINE=-y xmlstarlet"
+          #  "USE_PYTHON3_PIP_INSTALL_CMDLINE=xq"
 ```
 
 > **Note** You can use `secrets.READ_STATS_TOKEN` instead of `secrets.WRITE_STATS_TOKEN` as long as both repositories under the same repository owner.
