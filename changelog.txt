@@ -1,3 +1,6 @@
+2022.09.08:
+* fixed: action.yml: multiline input in `${{ input.env }}`
+
 2022.09.01:
 * new: action.yml: install `xmlstarlet` package into `ubuntu-latest` using `awalsh128/cache-apt-pkgs-action` as forked repo
 

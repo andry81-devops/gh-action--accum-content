@@ -2,6 +2,9 @@
 
 > :warning: to find all changes use [changelog.txt](https://github.com/andry81-devops/gh-action--accum-content/blob/master/changelog.txt) file in a directory
 
+## 2022.09.08:
+* fixed: action.yml: multiline input in `${{ input.env }}`
+
 ## 2022.09.01:
 * new: action.yml: install `xmlstarlet` package into `ubuntu-latest` using `awalsh128/cache-apt-pkgs-action` as forked repo
 
