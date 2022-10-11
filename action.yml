@@ -71,13 +71,39 @@ inputs:
     # example:
     #   `-H 'Cache-Control: no-cache'`
 
+  # NOTE:
+  #   The `flags` converts into `GH_WORKFLOW_FLAGS` environment variable as a single line string.
+  #   You must evaluate it to a shell array to be able to use it in the bash shell: `eval __flags__=($GH_WORKFLOW_FLAGS)`
+  #
+
+  flags:
+    description: >
+      String of flag values list in format of `NAME[=[EXPR]]` ready to be evaluated as a shell array: `(<0> <1> ... <N>)`.
+      If `EXPR` is not empty and begins by '[' then, use `eval EXPR` instead of `(( EXPR ))` expression.
+      Otherwise if a flag expression is `NAME=`, then false (unflagged).
+      Otherwise if a flag expression is `NAME`, then true (flagged).
+    # See dependent repositories and scripts for details.
+    # Flag expression examples:
+    #   # A is true, B is true, C is false, D is true, F is false, T is true.
+    #   # GH_WORKFLOW_FLAGS=`A=1 B="1 + 1" C="1 - 1" D='[[ "1" -eq "1" ]]' F= T`
+    #   flags: >-
+    #     A=1
+    #     B="1 + 1"
+    #     C="1 - 1"
+    #     D='[[ "1" -eq "1" ]]'
+    #     F=
+    #     T
+    # builtin flag names:
+    #   ENABLE_PRINT_INITIAL_ENV_INTO_STDOUT=1
+
   env:
     description: environment variables
     # See dependent repositories and scripts for details.
     # examples:
     #   ENABLE_GENERATE_CHANGELOG_FILE=1
-    #   ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1  # insert the time string in format HH:MMZ additionally after the date in each commit message
-    #   CHANGELOG_FILE=repo/owner-of-content/repo-with-content/content-changelog.txt
+    #   ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1            # insert the time string in format HH:MMZ additionally after the date in each commit message
+    #   ENABLE_COMMIT_MESSAGE_WITH_WORKFLOW_RUN_NUMBER=1  # insert the workflow run number after date/time prefix in each commit message
+    #   CHANGELOG_FILE=repo/{{REPO_OWNER}}/{{REPO}}/content-changelog.txt
     #   ENABLE_YAML_PRINT_AFTER_EDIT=1
     #   ENABLE_YAML_PRINT_AFTER_PATCH=1
     #   ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
@@ -95,6 +121,34 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: load `flags` parameter into `GH_WORKFLOW_FLAGS` environment variable
+      shell: bash
+      run: |
+        # suppress not zero exit code
+        { IFS=$' \t' read -r -d '' GH_WORKFLOW_FLAGS || (( 1 )); } <<::EOF::
+        ${{ inputs.flags }}
+        ::EOF::
+        GH_WORKFLOW_FLAGS="${GH_WORKFLOW_FLAGS//[$'\n\r']/}" # remove all line returns
+        echo "GH_WORKFLOW_FLAGS=$GH_WORKFLOW_FLAGS" >> $GITHUB_ENV
+
+    - name: print initial environment variables
+      shell: bash
+      run: |
+        eval __flags__=($GH_WORKFLOW_FLAGS)
+        for arg in "${__flags__[@]}"; do
+          # suppress not zero exit code
+          IFS=$'=\n' read -r -d '' name value <<< "$arg" || (( 1 ))
+          if [[ "$name" == 'ENABLE_PRINT_INITIAL_ENV_INTO_STDOUT' ]]; then
+            # If `value` is not empty and begins by '[' then, use `eval "$value"` instead of `(( value ))` expression.
+            # Otherwise if `value` is empty and `arg` with assign character, then false (unflagged).
+            # Otherwise if `value` is empty and `arg` without assign character, then true (flagged).
+            if [[ -z "$value" && "${arg/=/}" == "$arg" ]] || ( [[ "${value:0:1}" != "[" ]] && (( value )) ) || ( [[ "${value:0:1}" == "[" ]] && eval "$value" ) ; then
+              env | sort
+              break
+            fi
+          fi
+        done
+
     - name: install packages with caching
       uses: andry81-forks/cache-apt-pkgs-action@latest
       with:
@@ -120,10 +174,8 @@ runs:
     - name: update permissions
       shell: bash
       run: |
-        chmod ug+x $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh
-        chmod ug+x $GH_WORKFLOW_ROOT/bash/github/print-notice.sh
-        chmod ug+x $GH_WORKFLOW_ROOT/bash/github/flush-print-annotations.sh
-        chmod ug+x $GH_WORKFLOW_ROOT/bash/cache/accum-content.sh
+        chmod ug+x $GH_WORKFLOW_ROOT/bash/_common/update-permissions.sh
+        $GH_WORKFLOW_ROOT/bash/_common/update-permissions.sh ug+x "$GH_WORKFLOW_ROOT/bash" -iname '*.sh'
 
     # step is required to pass environment variables externally
     - name: declare variables from lists
@@ -210,8 +262,10 @@ runs:
         $GH_WORKFLOW_ROOT/bash/github/print-notice.sh \
           "content config file: https://github.com/${{ inputs.config_repo_owner }}/${{ inputs.config_repo }}/tree/${{ inputs.config_repo_branch }}/${{ inputs.content_config_file }}" \
           "content index file: https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/tree/${{ inputs.store_repo_branch }}/${{ inputs.content_index_file }}" \
-          "content index dir: ${{ inputs.content_index_dir }}" \
-          "content changelog file: https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/tree/${{ inputs.store_repo_branch }}/$changelog_file"
+          "content index dir: ${{ inputs.content_index_dir }}"
+        $GH_WORKFLOW_ROOT/bash/github/print-notice-ln.sh \
+          "content changelog file: https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/tree/${{ inputs.store_repo_branch }}/$changelog_file" \
+          "env:"$'\n'"  GITHUB_RUN_ID=\`$GITHUB_RUN_ID\`"$'\n'"  GITHUB_RUN_NUMBER=\`$GITHUB_RUN_NUMBER\`"
 
     - name: checkout content-config@${{ inputs.config_repo_branch }}
       uses: andry81-devops/gh-action--git-checkout@master
@@ -252,7 +306,12 @@ runs:
         git add .
         git config --global user.name "GitHub Action"
         git config --global user.email "action@github.com"
-        git commit -m "A/U: $COMMIT_MESSAGE_DATE_TIME_PREFIX: ${COMMIT_MESSAGE_PREFIX}${COMMIT_MESSAGE_SUFFIX:+" | "}$COMMIT_MESSAGE_SUFFIX"
+        COMMIT_MESSAGE="A/U: $COMMIT_MESSAGE_DATE_TIME_PREFIX:"
+        if (( ENABLE_COMMIT_MESSAGE_WITH_WORKFLOW_RUN_NUMBER )) && [[ -n "$GITHUB_RUN_NUMBER" ]]; then
+          COMMIT_MESSAGE="$COMMIT_MESSAGE #$GITHUB_RUN_NUMBER:"
+        fi
+        COMMIT_MESSAGE="$COMMIT_MESSAGE ${COMMIT_MESSAGE_PREFIX}${COMMIT_MESSAGE_SUFFIX:+" | "}$COMMIT_MESSAGE_SUFFIX"
+        git commit -m "$COMMIT_MESSAGE"
         $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
           "HEAD_COMMIT_HASH=$(git rev-parse HEAD)"
 

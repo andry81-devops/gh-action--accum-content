@@ -68,9 +68,9 @@ All tutorials: https://github.com/andry81/index#tutorials
 
   * Reduces traffic to an external resource and avoids an out-of-service case.
 
-  * Does better cache on the GitHub side, when a resource can be checked on a cache expiration and so updated opposite to an external resource, where the resource is relied on external caching and has to be completely redownloaded.
+  * Does better cache on the GitHub side, when a resource can be checked on a cache expiration and so updated opposite to an external resource, where the resource is relied on external caching and so has to be completely redownloaded.
 
-* Content can be changed after download but before store in a repository. For example, for a SVG file - resized or cleanuped (not implemented).
+* Content can be validated or/and altered after download, but before store in a repository. For example, for a SVG file - checked on valid values, resized or cleanuped.
 
 * Downloads content under GitHub Actions pipeline IP.
 
@@ -85,11 +85,13 @@ All tutorials: https://github.com/andry81/index#tutorials
 
 **Functionality of the script**:
 
-* Can skip warnings and errors (`CONTINUE_ON_INVALID_INPUT=1`, `CONTINUE_ON_EMPTY_CHANGES=1`)
+* Can treat invalid input or empty changes as not an error as by default (`CONTINUE_ON_INVALID_INPUT=1`, `CONTINUE_ON_EMPTY_CHANGES=1`)
+
+* Can treat empty changes without errors as an error if enabled to continue on empty changes (`ERROR_ON_EMPTY_CHANGES_WITHOUT_ERRORS=1` if `CONTINUE_ON_EMPTY_CHANGES=1`)
 
 * Can skip not yet expired entries and continue on to download (`NO_SKIP_UNEXPIRED_ENTRIES=1`)
 
-* Can skip entries download (`NO_DOWNLOAD_ENTRIES=1`, `NO_DOWNLOAD_ENTRIES_AND_CREATE_EMPTY_INSTEAD=1`)
+* Can skip entries for download (`NO_DOWNLOAD_ENTRIES=1`, `NO_DOWNLOAD_ENTRIES_AND_CREATE_EMPTY_INSTEAD=1`)
 
 * Does use content index file `content-index.yml` to control the up to date and by default does generate the content index file from the content config file `content-config.yml` if does not exist.
 
@@ -97,13 +99,15 @@ All tutorials: https://github.com/andry81/index#tutorials
 
 * Can insert the time string in format `HH:MMZ` additionally after the date in each commit message (by default inserts only a date for shorter commit messages; `ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1`)
 
-* Can print GitHub Actions Run URL into changelog (`ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1`)
+* Can insert the workflow run number after date/time prefix in each commit message (by default does not insert for shorter commit messages; `ENABLE_COMMIT_MESSAGE_WITH_WORKFLOW_RUN_NUMBER=1`)
 
-* Can use download validation scrtips to run validation code after a file download (see `content-config.yml` example below)
+* Can print GitHub Actions Run URL (with workflow run number) into the changelog file to reference the log on the GitHub (`ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1`)
 
-* Can install `apt-get` and `python3` packages and modules before use (`USE_APT_GET_INSTALL_CMDLINE="<apt-get-install-cmdline>"`, `USE_PYTHON3_PIP_INSTALL_CMDLINE="<pip-install-cmdline>"`)
+* Can run download validation shell code after a file download (see `content-config.yml` example below)
 
-  > **Note** This is mostly for the testing purposes. In case of slow installation of many dependencies, packages or modules you have to use an installation together with the caching feature.
+* Can install `apt-get` and `python3` packages and modules (w/o caching feature support) before script execution (`USE_APT_GET_INSTALL_CMDLINE="<apt-get-install-cmdline>"`, `USE_PYTHON3_PIP_INSTALL_CMDLINE="<pip-install-cmdline>"`)
+
+  > **Note** This is mostly for the testing purposes. In case of slow installation of many dependencies, packages or modules you have to use an installation together with the caching feature support.
   > See available list of solutions from here: https://stackoverflow.com/questions/59269850/caching-apt-packages-in-github-actions-workflow/73500415#73500415
 
 # USAGE
@@ -133,57 +137,6 @@ content-config:
         #run: |
         #  #!/bin/bash
         #  exit 0
-
-      download-validate:
-        # required
-        dir-match-paths: |
-          badges/*
-        # optional
-        xpath-match-tokens: |
-          svg/g[1]/text[3]
-        
-        shell: bash
-        # Input variables:
-        #   GH_WORKFLOW_ROOT,
-        #   IS_STORED_FILE_EXIST, STORED_FILE, STORED_FILE_SIZE, STORED_FILE_HASH,
-        #   DOWNLOADED_FILE, DOWNLOADED_FILE_SIZE, DOWNLOADED_FILE_HASH,
-        #   XPATH_MATCH_TOKENS
-        #
-        # CAUTION:
-        #   First line must be a shebang line, otherwise each script line will run in a child bash process!
-        #
-        run: |
-          #!/bin/bash
-          
-          # validate download unconditionally on first time download
-          (( ! IS_STORED_FILE_EXIST )) && return 0
-          
-          source "$GH_WORKFLOW_ROOT/_externals/tacklelib/bash/tacklelib/bash_tacklelib" || exit 255
-          
-          tkl_include_or_abort "$GH_WORKFLOW_ROOT/bash/github/init-xq-workflow.sh"
-          
-          XPATH_TOKEN="${XPATH_MATCH_TOKENS[0]}"
-          
-          if (( ${#XQ_CMDLINE_READ[@]} )); then
-            # replace all `/` by `.`
-            XPATH_TOKEN="${XPATH_TOKEN////.}"
-            IFS=$'\n' read -r value <<< "$("${XQ_CMDLINE_READ[@]}" '.$XPATH_TOKEN."#text"' "$DOWNLOADED_FILE")" || exit 255
-          elif (( ${#XMLSTARLET_CMDLINE_SEL[@]} )); then
-            # increment all array indexes, because xpath array index must start from 1 instead of 0
-            XPATH_TOKEN="$(perl -pe 's/\[(\d+)\]/"[".($1+1)."]"/ge' <<< "$XPATH_TOKEN")"
-            # workaround xmlstarlet svg file parse by removing all attributes from the `svg` tag
-            value="$(sed 's/<svg [^>]*/<svg/' "$DOWNLOADED_FILE" | "${XMLSTARLET_CMDLINE_SEL[@]}" -t -v "//$XPATH_TOKEN")" || exit 255
-          else
-            exit 255
-          fi
-          
-          value="${value//[ $'\t'a-zA-Z]/}"
-          value_int="${value%.*}"
-          value_fract="${value#*.}"
-          [[ "$value_fract" == "$value" ]] && value_fract=0
-          (( value_int || value_fract )) && exit 0
-          
-          exit 255
 
       dirs:
 
@@ -266,6 +219,39 @@ content-config:
             - file:       tokei-lines-of-code.svg
               query-url:  https://tokei.rs/b1/github/{{REPO_OWNER}}/{{REPO}}?category=code
 
+              download-validate:
+                shell: bash
+                # Input variables:
+                #   GH_WORKFLOW_ROOT, GH_WORKFLOW_FLAGS,
+                #   IS_STORED_FILE_EXIST, STORED_FILE, STORED_FILE_SIZE, STORED_FILE_HASH,
+                #   DOWNLOADED_FILE, DOWNLOADED_FILE_SIZE, DOWNLOADED_FILE_HASH
+                #
+                # CAUTION:
+                #   First line must be a shebang line, otherwise each script line will run in a child bash process!
+                #
+                run: |
+                  #!/bin/bash
+                  
+                  source "$GH_WORKFLOW_ROOT/_externals/tacklelib/bash/tacklelib/bash_tacklelib" || exit 255
+                  
+                  tkl_include_or_abort "$GH_WORKFLOW_ROOT/bash/github/init-xq-workflow.sh"
+                  
+                  if (( ${#XQ_CMDLINE_READ[@]} )); then
+                    IFS=$'\n' read -r value <<< "$("${XQ_CMDLINE_READ[@]}" '.svg.g[1].text[3]."#text"' "$DOWNLOADED_FILE")" || exit 255
+                  elif (( ${#XMLSTARLET_CMDLINE_SEL[@]} )); then
+                    value="$(sed 's/<svg [^>]*/<svg/' "$DOWNLOADED_FILE" | "${XMLSTARLET_CMDLINE_SEL[@]}" -t -v "//svg/g[2]/text[4]")" || exit 255
+                  else
+                    exit 255
+                  fi
+                  
+                  value="${value//[ $'\t'a-zA-Z]/}"
+                  value_int="${value%.*}"
+                  value_fract="${value#*.}"
+                  [[ "$value_fract" == "$value" ]] && value_fract=0
+                  (( value_int || value_fract )) && exit 0
+                  
+                  exit 255
+
             #- file:       tokei-lines.svg
             #  query-url:  https://img.shields.io/tokei/lines/github/{{REPO_OWNER}}/{{REPO}}?logo=tokei
 ```
@@ -326,9 +312,13 @@ jobs:
             -H 'Cache-Control: no-cache'
             -v
 
+          #flags: >-
+          #  ENABLE_PRINT_INITIAL_ENV_INTO_STDOUT=1
+
           env: >-
             ENABLE_GENERATE_CHANGELOG_FILE=1
-            ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1  # insert the time string in format HH:MMZ additionally after the date in each commit message
+            ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1            # insert the time string in format HH:MMZ additionally after the date in each commit message
+            ENABLE_COMMIT_MESSAGE_WITH_WORKFLOW_RUN_NUMBER=1  # insert the workflow run number after date/time prefix in each commit message
             CHANGELOG_FILE=repo/{{REPO_OWNER}}/{{REPO}}/content-changelog.txt
             ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
             ENABLE_YAML_DIFF_PRINT_BEFORE_PATCH=1
