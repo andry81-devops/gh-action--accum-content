@@ -103,7 +103,7 @@ All tutorials: https://github.com/andry81/index#tutorials
 
 * Can print GitHub Actions Run URL (with workflow run number) into the changelog file to reference the log on the GitHub from the changelog file (`ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1`)
 
-* Can print Commit Reference URL into the changelog file to reference a commit on the GitHub from the changelog file (`ENABLE_COMMIT_REFERENCE_URL_PRINT_TO_CHANGELOG=1`)
+* Can print Repo Stats Commit URL into the changelog file to reference a commit on the GitHub from the changelog file in the Content Cache Repository (`ENABLE_REPO_STATS_COMMIT_URL_PRINT_TO_CHANGELOG=1`)
 
 * Can run download validation shell code after a file download (see `content-config.yml` example below)
 
@@ -325,7 +325,7 @@ jobs:
             ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
             ENABLE_YAML_DIFF_PRINT_BEFORE_PATCH=1
             ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1
-            ENABLE_COMMIT_REFERENCE_URL_PRINT_TO_CHANGELOG=1
+            ENABLE_REPO_STATS_COMMIT_URL_PRINT_TO_CHANGELOG=1
             CONTINUE_ON_EMPTY_CHANGES=1
             ERROR_ON_EMPTY_CHANGES_WITHOUT_ERRORS=1
           #  CONTINUE_ON_INVALID_INPUT=1
