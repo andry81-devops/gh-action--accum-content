@@ -43,8 +43,8 @@
 ---
 
 <p align="center">
-  <a href="https://github.com/andry81-devops/gh-action--accum-content/blob/master/userlog.md">Userlog</a>
-• <a href="https://github.com/andry81-devops/gh-action--accum-content/blob/master/changelog.txt">Changelog</a>
+  <a href="https://github.com/andry81-devops/gh-action--accum-content/tree/HEAD/userlog.md">Userlog</a>
+• <a href="https://github.com/andry81-devops/gh-action--accum-content/tree/HEAD/changelog.txt">Changelog</a>
 • <a href="#dependecies">Dependencies</a>
 • <a href="#known-issues">Known issues</a>
 • <a href="#copyright-and-license"><img src="https://github.com/andry81-cache/gh-content-static-cache/raw/master/common/badges/license/mit-license.svg" valign="middle" alt="copyright and license" />&nbsp;Copyright and License</a>
@@ -75,9 +75,9 @@ All tutorials: https://github.com/andry81/index#tutorials
 * Downloads content under GitHub Actions pipeline IP.
 
 * Repository to store content config file and content can be different, and you may directly point the content repository as commits list:
-  `https://github.com/{{REPO_OWNER}}/{{REPO}}--gh-content-cache/commits/master`
+  `https://github.com/{{REPO_OWNER}}/{{REPO}}--gh-content-cache/commits/{{BRANCH}}`
 
-* Workflow is used [accum-content.sh](https://github.com/andry81-devops/gh-workflow/blob/master/bash/cache/accum-content.sh) bash script to accumulate content
+* Workflow is used [accum-content.sh](https://github.com/andry81-devops/gh-workflow/tree/HEAD/bash/cache/accum-content.sh) bash script to accumulate content
 
 * The script does accumulate content into a repository and does update the content index file:
   `content-index.yml`
@@ -103,7 +103,10 @@ All tutorials: https://github.com/andry81/index#tutorials
 
 * Can print GitHub Actions Run URL (with workflow run number) into the changelog file to reference the log on the GitHub from the changelog file (`ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1`)
 
-* Can print Repo Stats Commit URL into the changelog file to reference a commit on the GitHub from the changelog file in the Content Cache Repository (`ENABLE_REPO_STATS_COMMIT_URL_PRINT_TO_CHANGELOG=1`)
+* Can print Content Store Repository commit URL into the changelog file to reference the commit from being committed changelog file (`ENABLE_REPO_STORE_COMMITS_URL_PRINT_TO_CHANGELOG=1`)
+
+  > **Note** The actual hash of the commit can not be know on the moment of the commit. So instead of the commit hash, an approximate date of the commit is used (~ +5 min ahead) in format of:
+  > `https://github.com/{{REPO_OWNER}}/{{REPO}}--gh-content-cache/commits?branch={{BRANCH}}&until=YYYY-MM-DD`
 
 * Can run download validation shell code after a file download (see `content-config.yml` example below)
 
@@ -325,7 +328,7 @@ jobs:
             ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
             ENABLE_YAML_DIFF_PRINT_BEFORE_PATCH=1
             ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1
-            ENABLE_REPO_STATS_COMMIT_URL_PRINT_TO_CHANGELOG=1
+            ENABLE_REPO_STORE_COMMITS_URL_PRINT_TO_CHANGELOG=1
             CONTINUE_ON_EMPTY_CHANGES=1
             ERROR_ON_EMPTY_CHANGES_WITHOUT_ERRORS=1
           #  CONTINUE_ON_INVALID_INPUT=1
@@ -359,4 +362,4 @@ https://github.com/andry81-devops/accum-content#last-known-issues-updates
 
 ## <a name="copyright-and-license">Copyright and License</a>
 
-Code and documentation copyright 2022 Andrey Dibrov. Code released under [MIT License](https://github.com/andry81-devops/gh-action--accum-content/blob/master/license.txt)
+Code and documentation copyright 2022 Andrey Dibrov. Code released under [MIT License](https://github.com/andry81-devops/gh-action--accum-content/tree/HEAD/license.txt)

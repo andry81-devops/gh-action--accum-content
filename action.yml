@@ -110,7 +110,7 @@ inputs:
     #   ENABLE_YAML_DIFF_PRINT_BEFORE_PATCH=1
     #   ENABLE_YAML_PATCH_DIFF_PAUSE_MODE=1
     #   ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1
-    #   ENABLE_REPO_STATS_COMMIT_URL_PRINT_TO_CHANGELOG=1
+    #   ENABLE_REPO_STORE_COMMITS_URL_PRINT_TO_CHANGELOG=1
     #   CONTINUE_ON_INVALID_INPUT=1
     #   CONTINUE_ON_EMPTY_CHANGES=1
     #   ERROR_ON_EMPTY_CHANGES_WITHOUT_ERRORS=1
@@ -190,7 +190,8 @@ runs:
         INPUT_ENV="${INPUT_ENV//[$'\n\r']/}" # remove all line returns
         $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
           ${INPUT_ENV} \
-          "GHWF_GITHUB_ACTIONS_RUN_URL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          "GHWF_GITHUB_ACTIONS_RUN_URL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+          "GHWF_REPO_STORE_COMMITS_URL=https://github.com/${{ github.repository }}/commits?branch=${{ inputs.store_repo_branch }}"
 
     - name: install apt-get prerequisites
       shell: bash
@@ -325,7 +326,7 @@ runs:
         directory:    content-cache
         github_token: ${{ inputs.store_repo_write_token }}
 
-    - name: print commit parameters
+    - name: print commit parameters into pipeline log only
       shell: bash
       run: |
         $GH_WORKFLOW_ROOT/bash/github/print-notice.sh \
