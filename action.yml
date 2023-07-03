@@ -123,9 +123,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: load `flags` parameter into `GH_WORKFLOW_FLAGS` environment variable
+    - name: '[accum-content][01] load `flags` parameter into `GH_WORKFLOW_FLAGS` environment variable'
       shell: bash
       run: |
+        ### [accum-content][01] load `flags` parameter into `GH_WORKFLOW_FLAGS` environment variable
         # suppress not zero exit code
         { IFS=$' \t' read -r -d '' GH_WORKFLOW_FLAGS || (( 1 )); } <<::EOF::
         ${{ inputs.flags }}
@@ -133,9 +134,10 @@ runs:
         GH_WORKFLOW_FLAGS="${GH_WORKFLOW_FLAGS//[$'\n\r']/}" # remove all line returns
         echo "GH_WORKFLOW_FLAGS=$GH_WORKFLOW_FLAGS" >> $GITHUB_ENV
 
-    - name: print initial environment variables
+    - name: '[accum-content][02] print initial environment variables'
       shell: bash
       run: |
+        ### [accum-content][02] print initial environment variables
         eval __flags__=($GH_WORKFLOW_FLAGS)
         for arg in "${__flags__[@]}"; do
           # suppress not zero exit code
@@ -151,18 +153,19 @@ runs:
           fi
         done
 
-    - name: install packages with caching
+    - name: '[accum-content][03] install packages with caching'
       uses: andry81-forks/cache-apt-pkgs-action@latest
       with:
         packages: xmlstarlet
 
     # step is required to workaround variable expansion in variables
-    - name: declare dependent variables
+    - name: '[accum-content][04] declare dependent variables'
       shell: bash
       run: |
+        ### [accum-content][04] declare dependent variables
         echo "GH_WORKFLOW_ROOT=$GITHUB_WORKSPACE/gh-workflow" >> $GITHUB_ENV
 
-    - name: checkout gh-workflow@${{ inputs.deps_repo_branch }}
+    - name: '[accum-content][05] checkout gh-workflow@${{ inputs.deps_repo_branch }}'
       uses: andry81-devops/gh-action--git-checkout@master
       with:
         repository: ${{ inputs.deps_repo_owner }}/gh-workflow
@@ -173,16 +176,18 @@ runs:
         mkdir-p: >-
           ${{ env.GH_WORKFLOW_ROOT }}
 
-    - name: update permissions
+    - name: '[accum-content][06] update permissions'
       shell: bash
       run: |
+        ### [accum-content][06] update permissions
         chmod ug+x $GH_WORKFLOW_ROOT/bash/_common/update-permissions.sh
         $GH_WORKFLOW_ROOT/bash/_common/update-permissions.sh ug+x "$GH_WORKFLOW_ROOT/bash" -iname '*.sh'
 
     # step is required to pass environment variables externally
-    - name: declare variables from lists
+    - name: '[accum-content][07] declare variables from lists'
       shell: bash
       run: |
+        ### [accum-content][07] declare variables from lists
         # suppress not zero exit code
         { IFS=$' \t' read -r -d '' INPUT_ENV || (( 1 )); } <<::EOF::
         ${{ inputs.env }}
@@ -193,9 +198,10 @@ runs:
           "GHWF_GITHUB_ACTIONS_RUN_URL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
           "GHWF_REPO_STORE_COMMITS_URL=https://github.com/${{ github.repository }}/commits?branch=${{ inputs.store_repo_branch }}"
 
-    - name: install apt-get prerequisites
+    - name: '[accum-content][08] install apt-get prerequisites'
       shell: bash
       run: |
+        ### [accum-content][08] install apt-get prerequisites
         if [[ -n "$USE_APT_GET_INSTALL_CMDLINE" ]]; then
           function call()
           {
@@ -209,9 +215,10 @@ runs:
           done <<< "$USE_APT_GET_INSTALL_CMDLINE"
         fi
 
-    - name: install python prerequisites
+    - name: '[accum-content][09] install python prerequisites'
       shell: bash
       run: |
+        ### [accum-content][09] install python prerequisites
         if [[ -n "$USE_PYTHON3_PIP_INSTALL_CMDLINE" ]]; then
           function call()
           {
@@ -225,9 +232,10 @@ runs:
           done <<< "$USE_PYTHON3_PIP_INSTALL_CMDLINE"
         fi
 
-    - name: variables validation
+    - name: '[accum-content][10] variables validation'
       shell: bash
       run: |
+        ### [accum-content][10] variables validation
         $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
           "CHANGELOG_FILE=${CHANGELOG_FILE:-"changelog.txt"}"
         if (( ! NO_SKIP_UNEXPIRED_ENTRIES )) && [[ "${{ github.event.inputs.no_skip_unexpired_entries }}" == 'true' || "${{ github.event.inputs.no_skip_unexpired_entries }}" -ne 0 ]]; then
@@ -239,9 +247,10 @@ runs:
             "NO_DOWNLOAD_ENTRIES=1"
         fi
 
-    - name: declare local variables
+    - name: '[accum-content][11] declare local variables'
       shell: bash
       run: |
+        ### [accum-content][11] declare local variables
         $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
           "changelog_file=$CHANGELOG_FILE" \
           "CHANGELOG_FILE=$GITHUB_WORKSPACE/content-cache/$CHANGELOG_FILE" \
@@ -251,17 +260,19 @@ runs:
           "content_index_dir=${{ inputs.content_index_dir }}" \
           "curl_flags=${{ inputs.curl_flags }}"
 
-    - name: declare local variables
+    - name: '[accum-content][12] declare local variables'
       shell: bash
       run: |
+        ### [accum-content][12] declare local variables
         $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
           "content_config_dir=${content_config_file%/*}" \
           "content_index_file_dir=${content_index_file%/*}" \
           "changelog_dir=${CHANGELOG_FILE%/*}"
 
-    - name: head annotations
+    - name: '[accum-content][13] head annotations'
       shell: bash
       run: |
+        ### [accum-content][13] head annotations
         $GH_WORKFLOW_ROOT/bash/github/print-notice.sh \
           "content config file: https://github.com/${{ inputs.config_repo_owner }}/${{ inputs.config_repo }}/tree/${{ inputs.config_repo_branch }}/${{ inputs.content_config_file }}" \
           "content index file: https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/tree/${{ inputs.store_repo_branch }}/${{ inputs.content_index_file }}" \
@@ -270,7 +281,7 @@ runs:
           "content changelog file: https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/tree/${{ inputs.store_repo_branch }}/$changelog_file" \
           "env:"$'\n'"  GITHUB_RUN_ID=\`$GITHUB_RUN_ID\`"$'\n'"  GITHUB_RUN_NUMBER=\`$GITHUB_RUN_NUMBER\`"
 
-    - name: checkout content-config@${{ inputs.config_repo_branch }}
+    - name: '[accum-content][14] checkout content-config@${{ inputs.config_repo_branch }}'
       uses: andry81-devops/gh-action--git-checkout@master
       with:
         repository: ${{ inputs.config_repo_owner }}/${{ inputs.config_repo }}
@@ -281,7 +292,7 @@ runs:
         mkdir-p: >-
           ${{ env.content_config_dir }}
 
-    - name: checkout content-cache@${{ inputs.store_repo_branch }}
+    - name: '[accum-content][15] checkout content-cache@${{ inputs.store_repo_branch }}'
       uses: andry81-devops/gh-action--git-checkout@master
       with:
         repository: ${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}
@@ -294,17 +305,19 @@ runs:
           ${{ env.content_index_dir }}
           ${{ env.changelog_dir }}
 
-    - name: 'accumulate content using `${{ inputs.config_repo_dir }}/${{ inputs.config_repo_file }}` config'
+    - name: '[accum-content][16] accumulate content using `${{ inputs.content_config_file }}` config'
       id: accum-content
       shell: bash
       run: |
+        ### [accum-content][16] accumulate content using `${{ inputs.content_config_file }}` config
         cd $GITHUB_WORKSPACE/content-cache
         $GH_WORKFLOW_ROOT/bash/cache/accum-content.sh
         # caution: no operation after that line if non zero exit code happens above
 
-    - name: commit content-cache
+    - name: '[accum-content][17] commit content-cache'
       shell: bash
       run: |
+        ### [accum-content][17] commit content-cache
         cd $GITHUB_WORKSPACE/content-cache
         git add .
         git config --global user.name "GitHub Action"
@@ -319,7 +332,7 @@ runs:
         $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
           "HEAD_COMMIT_HASH=$(git rev-parse HEAD)"
 
-    - name: push board-stats
+    - name: '[accum-content][18] push board-stats'
       uses: ad-m/github-push-action@master
       with:
         repository:   ${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}
@@ -327,14 +340,16 @@ runs:
         directory:    content-cache
         github_token: ${{ inputs.store_repo_write_token }}
 
-    - name: print commit parameters into pipeline log only
+    - name: '[accum-content][19] print commit parameters into pipeline log only'
       shell: bash
       run: |
+        ### [accum-content][19] print commit parameters into pipeline log only
         $GH_WORKFLOW_ROOT/bash/github/print-notice.sh \
           "commit reference url: https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/commit/$HEAD_COMMIT_HASH"
 
-    - name: flush print annotations
+    - name: '[accum-content][20] flush print annotations'
       if: always()
       shell: bash
       run: |
+        ### [accum-content][20] flush print annotations
         $GH_WORKFLOW_ROOT/bash/github/flush-print-annotations.sh
