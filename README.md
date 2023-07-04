@@ -68,13 +68,13 @@ All tutorials: https://github.com/andry81/index#tutorials
 
   * Reduces traffic to an external resource and avoids an out-of-service case.
 
-  * Does better cache on the GitHub side, when a resource can be checked on a cache expiration and so updated opposite to an external resource, where the resource is relied on external caching and so has to be completely redownloaded.
+  * Better does cacheing on the GitHub side, when a resource can be checked on a cache expiration and so updated opposite to an external resource, where the resource is relied on external caching and so has to be completely redownloaded.
 
-* Content can be validated or/and altered after download, but before store in a repository. For example, for a SVG file - checked on valid values, resized or cleanuped.
+* Content can be validated or/and altered after download, but before store in a repository. For example, for a SVG file - checks on valid values, size of canvas or malformed svg format.
 
-* Downloads content under GitHub Actions pipeline IP.
+* Downloads content under GitHub Actions pipeline IP instead of a client IP.
 
-* Repository to store content config file and content can be different, and you may directly point the content repository as commits list:
+* Repository to store content config file and content itself can be different, and you may directly point the content repository as commits list:
   `https://github.com/{{REPO_OWNER}}/{{REPO}}--gh-content-cache/commits/{{BRANCH}}`
 
 * Workflow is used [accum-content.sh](https://github.com/andry81-devops/gh-workflow/tree/HEAD/bash/cache/accum-content.sh) bash script to accumulate content
@@ -85,32 +85,42 @@ All tutorials: https://github.com/andry81/index#tutorials
 
 **Functionality of the script**:
 
-* Can treat invalid input or empty changes as not an error as by default (`CONTINUE_ON_INVALID_INPUT=1`, `CONTINUE_ON_EMPTY_CHANGES=1`)
+* `CONTINUE_ON_INVALID_INPUT=1`, `CONTINUE_ON_EMPTY_CHANGES=1`:
+  Treats invalid input or empty changes as not an error as by default.
 
-* Can treat empty changes without errors as an error if enabled to continue on empty changes (`ERROR_ON_EMPTY_CHANGES_WITHOUT_ERRORS=1` if `CONTINUE_ON_EMPTY_CHANGES=1`)
+* `ERROR_ON_EMPTY_CHANGES_WITHOUT_ERRORS=1` if `CONTINUE_ON_EMPTY_CHANGES=1`:
+  Treats empty changes without errors as an error if enabled to continue on empty changes.
 
-* Can skip not yet expired entries and continue on to download (`NO_SKIP_UNEXPIRED_ENTRIES=1`)
+* `NO_SKIP_UNEXPIRED_ENTRIES=1`:
+  Doesn't skip not yet expired entries and continue to process them.
 
-* Can skip entries for download (`NO_DOWNLOAD_ENTRIES=1`, `NO_DOWNLOAD_ENTRIES_AND_CREATE_EMPTY_INSTEAD=1`)
+* `NO_DOWNLOAD_ENTRIES=1`, `NO_DOWNLOAD_ENTRIES_AND_CREATE_EMPTY_INSTEAD=1`:
+  Skips download of all entries to not wait on download at all.
 
-* Does use content index file `content-index.yml` to control the up to date and by default does generate the content index file from the content config file `content-config.yml` if does not exist.
+* Uses and updates content index file `content-index.yml` to control the up to date and by default does generate the content index file from the content config file `content-config.yml` if does not exist.
 
-* Can generate a textual changelog file with notes about changes per commit (including changes absence in case of skipped errors or skipped content update; `ENABLE_GENERATE_CHANGELOG_FILE=1`, `CHANGELOG_FILE=".../content-changelog.txt"`)
+* `ENABLE_GENERATE_CHANGELOG_FILE=1`, `CHANGELOG_FILE=".../content-changelog.txt"`:
+  Generates a textual changelog file with notes about changes per commit including the changes absence in case of skipped errors or skipped content update.
 
-* Can insert the time string in format `HH:MMZ` additionally after the date in each commit message (by default inserts only a date for shorter commit messages; `ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1`)
+* `ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1`:
+  Inserts the time string in format `HH:MMZ` additionally after the date in each commit message (by default inserts only a date for shorter commit messages).
 
-* Can insert the workflow run number after date/time prefix in each commit message (by default does not insert for shorter commit messages; `ENABLE_COMMIT_MESSAGE_WITH_WORKFLOW_RUN_NUMBER=1`)
+* `ENABLE_COMMIT_MESSAGE_WITH_WORKFLOW_RUN_NUMBER=1`:
+  Inserts the workflow run number after date/time prefix in each commit message (by default does not insert for shorter commit messages).
 
-* Can print GitHub Actions Run URL (with workflow run number) into the changelog file to reference the log on the GitHub from the changelog file (`ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1`)
+* `ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1`:
+  Prints GitHub Actions Run URL (with or without workflow run number) into the changelog file to reference the log on the GitHub from the changelog file.
 
-* Can print Content Store Repository commit URL into the changelog file to reference the commit from being committed changelog file (`ENABLE_REPO_STORE_COMMITS_URL_PRINT_TO_CHANGELOG=1`)
+* `ENABLE_REPO_STORE_COMMITS_URL_PRINT_TO_CHANGELOG=1`:
+  Prints Content Store Repository commit URL into the changelog file to reference the commit from being committed changelog file.
 
   > **Note** The actual hash of the commit can not be know on the moment of the commit. So instead of the commit hash, an approximate date of the commit is used (~ +5 min ahead) in format of:
-  > `https://github.com/{{REPO_OWNER}}/{{REPO}}--gh-content-cache/commits?branch={{BRANCH}}&until=YYYY-MM-DD`
+  > `https://github.com/{{REPO_OWNER}}/{{REPO}}--gh-content-cache/commits?branch={{BRANCH}}&time_zone=utc&until=YYYY-MM-DD`
 
-* Can run download validation shell code after a file download (see `content-config.yml` example below)
+* Can run download validation shell code after a file download (see `content-config.yml` example below).
 
-* Can install `apt-get` and `python3` packages and modules (w/o caching feature support) before script execution (`USE_APT_GET_INSTALL_CMDLINE="<apt-get-install-cmdline>"`, `USE_PYTHON3_PIP_INSTALL_CMDLINE="<pip-install-cmdline>"`)
+* `USE_APT_GET_INSTALL_CMDLINE="<apt-get-install-cmdline>"`, `USE_PYTHON3_PIP_INSTALL_CMDLINE="<pip-install-cmdline>"`:
+  Installs `apt-get` and `python3` packages and modules (w/o caching feature support) before script execution.
 
   > **Note** This is mostly for the testing purposes. In case of slow installation of many dependencies, packages or modules you have to use an installation together with the caching feature support.
   > See available list of solutions from here: https://stackoverflow.com/questions/59269850/caching-apt-packages-in-github-actions-workflow/73500415#73500415
@@ -121,6 +131,7 @@ All tutorials: https://github.com/andry81/index#tutorials
 
 * `{{REPO_OWNER}}` -> repository owner
 * `{{REPO}}` -> your repository
+* `{{BRANCH}}` -> your repository branch or reference
 
 ## Examples:
 

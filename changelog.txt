@@ -1,4 +1,7 @@
 2023.07.04:
+* changed: README.md: description update
+
+2023.07.04:
 * fixed: action.yml: incorrect `GHWF_REPO_STORE_COMMITS_URL` variable value
 
 2023.07.03:
