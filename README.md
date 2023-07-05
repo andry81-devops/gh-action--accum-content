@@ -50,8 +50,8 @@
 • <a href="#copyright-and-license"><img src="https://github.com/andry81-cache/gh-content-static-cache/raw/master/common/badges/license/mit-license.svg" valign="middle" alt="copyright and license" />&nbsp;Copyright and License</a>
 </p>
 
-<h4 align="center">GitHub composite action to periodically download and accumulate content into repository.<br/>
-<br/>
+<h4 align="center">GitHub composite action to periodically download and accumulate content into repository.<br />
+<br />
 Tutorial to use with: https://github.com/andry81-devops/accum-content</h4>
 
 All tutorials: https://github.com/andry81/index#tutorials
@@ -60,7 +60,7 @@ All tutorials: https://github.com/andry81/index#tutorials
 
 # gh-action--accum-content@master
 
-**Features**:
+## Features:
 
 * Does store downloaded content in a repository on the GitHub, so all the resources does render from a repository file and does access a repository instead of an external resource, and:
 
@@ -82,8 +82,23 @@ All tutorials: https://github.com/andry81/index#tutorials
 * The script does accumulate content into a repository and does update the content index file:
   `content-index.yml`
 
+## Features of a standalone content cache repository:
 
-**Functionality of the script**:
+* Can extract content not related to a specific repository or related to multiple repositories from a target repository.
+
+* Can validate content by shell code handler before update it and filter out invalid content.
+
+* Extracted content can be updated separately from a target repository. For example, after a release commit into a target repository.
+
+* Traffic to an external resource can be replaced by traffic to the GitHub resource with better caching.
+
+* All content can be stored in a single place and content change be saved into a commits list.
+
+* Download and accumulate process can be controlled by explicit config file with parameters (can be outside of a content cache repository).
+
+* The content cache repository can be rewrited to remove old files and history does not touching anything else.
+
+## Functionality of the script:
 
 * `CONTINUE_ON_INVALID_INPUT=1`, `CONTINUE_ON_EMPTY_CHANGES=1`:
   Treats invalid input or empty changes as not an error as by default.
@@ -359,7 +374,7 @@ jobs:
 
 > **Note** See <a href="https://github.com/andry81-devops/github-accum-stats#reuse">REUSE</a> section for details if you have multiple repositories and want to store all GitHub workflow scripts (`.github/workflows/*.yml`) in a single repository.
 
-## <a name="dependecies">Dependencies</a>
+## Dependencies
 
 * https://github.com/andry81-devops/gh-workflow
 
@@ -371,6 +386,6 @@ https://github.com/andry81-devops/accum-content#known-issues
 
 https://github.com/andry81-devops/accum-content#last-known-issues-updates
 
-## <a name="copyright-and-license">Copyright and License</a>
+## Copyright and License
 
 Code and documentation copyright 2022 Andrey Dibrov. Code released under [MIT License](https://github.com/andry81-devops/gh-action--accum-content/tree/HEAD/license.txt)
