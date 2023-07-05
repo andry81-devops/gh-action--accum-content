@@ -62,7 +62,7 @@ All tutorials: https://github.com/andry81/index#tutorials
 
 **Features**:
 
-* Does store downloaded content in a repository on the GitHub, so all the resources does render from a repository file and does access a repository instead of an external resource, which:
+* Does store downloaded content in a repository on the GitHub, so all the resources does render from a repository file and does access a repository instead of an external resource, and:
 
   * Prevents a broken link case holding at the same time the link content up to date and has option to roll back the content to previous version in case of broken or invalid content (if history was not rewrited and purged).
 
@@ -97,7 +97,7 @@ All tutorials: https://github.com/andry81/index#tutorials
 * `NO_DOWNLOAD_ENTRIES=1`, `NO_DOWNLOAD_ENTRIES_AND_CREATE_EMPTY_INSTEAD=1`:
   Skips download of all entries to not wait on download at all.
 
-* Uses and updates content index file `content-index.yml` to control the up to date and by default does generate the content index file from the content config file `content-config.yml` if does not exist.
+* Uses and updates content index file `content-index.yml` to control the up to date and by default does generate the content index file from the content config file `content-config.yml`, if does not exist.
 
 * `ENABLE_GENERATE_CHANGELOG_FILE=1`, `CHANGELOG_FILE=".../content-changelog.txt"`:
   Generates a textual changelog file with notes about changes per commit including the changes absence in case of skipped errors or skipped content update.

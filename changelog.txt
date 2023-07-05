@@ -1,4 +1,7 @@
 2023.07.05:
+* fixed: README.md: description fixup
+
+2023.07.05:
 * fixed: action.yml: execution fixup
 
 2023.07.04:
