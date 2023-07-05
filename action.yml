@@ -196,7 +196,7 @@ runs:
         $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
           ${INPUT_ENV} \
           "GHWF_GITHUB_ACTIONS_RUN_URL=https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-          "GHWF_REPO_STORE_COMMITS_URL=https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/commits?branch=${{ inputs.store_repo_branch }}
+          "GHWF_REPO_STORE_COMMITS_URL=https://github.com/${{ inputs.store_repo_owner }}/${{ inputs.store_repo }}/commits?branch=${{ inputs.store_repo_branch }}"
 
     - name: '[accum-content][08] install apt-get prerequisites'
       shell: bash
