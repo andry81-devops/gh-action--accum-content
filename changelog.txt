@@ -1,4 +1,7 @@
 2023.07.10:
+* changed: README.md: missed change
+
+2023.07.10:
 * changed: README.md: commented currently not implemented functionality
 
 2023.07.05:
