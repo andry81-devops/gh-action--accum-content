@@ -176,8 +176,8 @@ content-config:
             next-update:
               timestamp: 04:00Z
 
-          xpath-match-tokens: |
-            svg/g[1]/text[3]
+          #xpath-match-tokens: |
+          #  svg/g[1]/text[3]
 
           files:
 
@@ -198,8 +198,8 @@ content-config:
             next-update:
               timestamp: 04:00Z
 
-          xpath-match-tokens: |
-            svg/g[1]/text[3]
+          #xpath-match-tokens: |
+          #  svg/g[1]/text[3]
 
           files:
 
@@ -236,8 +236,8 @@ content-config:
             next-update:
               timestamp: 08:00Z
 
-          xpath-match-tokens: |
-            svg/g[1]/text[3]
+          #xpath-match-tokens: |
+          #  svg/g[1]/text[3]
 
           files:
 
@@ -250,38 +250,38 @@ content-config:
             - file:       tokei-lines-of-code.svg
               query-url:  https://tokei.rs/b1/github/{{REPO_OWNER}}/{{REPO}}?category=code
 
-              download-validate:
-                shell: bash
-                # Input variables:
-                #   GH_WORKFLOW_ROOT, GH_WORKFLOW_FLAGS,
-                #   IS_STORED_FILE_EXIST, STORED_FILE, STORED_FILE_SIZE, STORED_FILE_HASH,
-                #   DOWNLOADED_FILE, DOWNLOADED_FILE_SIZE, DOWNLOADED_FILE_HASH
-                #
-                # CAUTION:
-                #   First line must be a shebang line, otherwise each script line will run in a child bash process!
-                #
-                run: |
-                  #!/bin/bash
-                  
-                  source "$GH_WORKFLOW_ROOT/_externals/tacklelib/bash/tacklelib/bash_tacklelib" || exit 255
-                  
-                  tkl_include_or_abort "$GH_WORKFLOW_ROOT/bash/github/init-xq-workflow.sh"
-                  
-                  if (( ${#XQ_CMDLINE_READ[@]} )); then
-                    IFS=$'\n' read -r value <<< "$("${XQ_CMDLINE_READ[@]}" '.svg.g[1].text[3]."#text"' "$DOWNLOADED_FILE")" || exit 255
-                  elif (( ${#XMLSTARLET_CMDLINE_SEL[@]} )); then
-                    value="$(sed 's/<svg [^>]*/<svg/' "$DOWNLOADED_FILE" | "${XMLSTARLET_CMDLINE_SEL[@]}" -t -v "//svg/g[2]/text[4]")" || exit 255
-                  else
-                    exit 255
-                  fi
-                  
-                  value="${value//[ $'\t'a-zA-Z]/}"
-                  value_int="${value%.*}"
-                  value_fract="${value#*.}"
-                  [[ "$value_fract" == "$value" ]] && value_fract=0
-                  (( value_int || value_fract )) && exit 0
-                  
-                  exit 255
+            #  download-validate:
+            #    shell: bash
+            #    # Input variables:
+            #    #   GH_WORKFLOW_ROOT, GH_WORKFLOW_FLAGS,
+            #    #   IS_STORED_FILE_EXIST, STORED_FILE, STORED_FILE_SIZE, STORED_FILE_HASH,
+            #    #   DOWNLOADED_FILE, DOWNLOADED_FILE_SIZE, DOWNLOADED_FILE_HASH
+            #    #
+            #    # CAUTION:
+            #    #   First line must be a shebang line, otherwise each script line will run in a child bash process!
+            #    #
+            #    run: |
+            #      #!/bin/bash
+            #      
+            #      source "$GH_WORKFLOW_ROOT/_externals/tacklelib/bash/tacklelib/bash_tacklelib" || exit 255
+            #      
+            #      tkl_include_or_abort "$GH_WORKFLOW_ROOT/bash/github/init-xq-workflow.sh"
+            #      
+            #      if (( ${#XQ_CMDLINE_READ[@]} )); then
+            #        IFS=$'\n' read -r value <<< "$("${XQ_CMDLINE_READ[@]}" '.svg.g[1].text[3]."#text"' "$DOWNLOADED_FILE")" || exit 255
+            #      elif (( ${#XMLSTARLET_CMDLINE_SEL[@]} )); then
+            #        value="$(sed 's/<svg [^>]*/<svg/' "$DOWNLOADED_FILE" | "${XMLSTARLET_CMDLINE_SEL[@]}" -t -v "//svg/g[2]/text[4]")" || exit 255
+            #      else
+            #        exit 255
+            #      fi
+            #      
+            #      value="${value//[ $'\t'a-zA-Z]/}"
+            #      value_int="${value%.*}"
+            #      value_fract="${value#*.}"
+            #      [[ "$value_fract" == "$value" ]] && value_fract=0
+            #      (( value_int || value_fract )) && exit 0
+            #      
+            #      exit 255
 
             #- file:       tokei-lines.svg
             #  query-url:  https://img.shields.io/tokei/lines/github/{{REPO_OWNER}}/{{REPO}}?logo=tokei
