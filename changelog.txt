@@ -1,4 +1,8 @@
 2026.01.15:
+* new: action.yml: `disable_yaml_edit_format_restore` action input variable to set `DISABLE_YAML_EDIT_FORMAT_RESTORE_BY_DIFF_MERGE_WORKAROUND` environment variable if not set
+* changed: README.md: readme update
+
+2026.01.15:
 * new: action.yml: `enable_yaml_print_all` action input variable to set `ENABLE_YAML_PRINT_ALL` environment variable if not set
 * changed: README.md: readme update
 * refactor: action.yml: minor refactor

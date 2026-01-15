@@ -112,8 +112,9 @@ inputs:
     #   ENABLE_YAML_PRINT_AFTER_PATCH=1
     #   ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
     #   ENABLE_YAML_DIFF_PRINT_BEFORE_PATCH=1
-    #   ENABLE_YAML_PATCH_DIFF_PAUSE_MODE=1
     #   ENABLE_YAML_PRINT_ALL=1                                           # all `ENABLE_YAML_*PRINT*` variables
+    #   ENABLE_YAML_PATCH_DIFF_PAUSE_MODE=1
+    #   DISABLE_YAML_EDIT_FORMAT_RESTORE_BY_DIFF_MERGE_WORKAROUND=1       # disable workaround: YAML edit format restore by diff merge
     #   ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1
     #   ENABLE_REPO_STORE_COMMITS_URL_PRINT_TO_CHANGELOG=1
     #   CONTINUE_ON_INVALID_INPUT=1
@@ -254,6 +255,10 @@ runs:
         if (( ! ENABLE_YAML_PRINT_ALL )) && [[ "${{ github.event.inputs.enable_yaml_print_all }}" == 'true' || "${{ github.event.inputs.enable_yaml_print_all }}" -ne 0 ]]; then
           $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
             "ENABLE_YAML_PRINT_ALL=1"
+        fi
+        if (( ! DISABLE_YAML_EDIT_FORMAT_RESTORE_BY_DIFF_MERGE_WORKAROUND )) && [[ "${{ github.event.inputs.disable_yaml_edit_format_restore }}" == 'true' || "${{ github.event.inputs.disable_yaml_edit_format_restore }}" -ne 0 ]]; then
+          $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
+            "DISABLE_YAML_EDIT_FORMAT_RESTORE_BY_DIFF_MERGE_WORKAROUND=1"
         fi
 
     - name: '[accum-content][11] declare local variables'

@@ -314,6 +314,10 @@ on:
         description: 'Enable YAML functions to print all'
         required: false
         default: 'false'
+      disable_yaml_edit_format_restore:
+        description: 'Disable YAML edit format restore'
+        required: false
+        default: 'false'
 
 jobs:
   accum-content-cache:
@@ -356,8 +360,8 @@ jobs:
           env: >-
             ENABLE_GENERATE_CHANGELOG_FILE=1
             CHANGELOG_FILE=repo/{{REPO_OWNER}}/{{REPO}}/content-changelog.txt
-            ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1            # insert the time string in format HH:MMZ additionally after the date in each commit message
-            ENABLE_COMMIT_MESSAGE_WITH_WORKFLOW_RUN_NUMBER=1  # insert the workflow run number after date/time prefix in each commit message
+            ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1                            # insert the time string in format HH:MMZ additionally after the date in each commit message
+            ENABLE_COMMIT_MESSAGE_WITH_WORKFLOW_RUN_NUMBER=1                  # insert the workflow run number after date/time prefix in each commit message
             ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
             ENABLE_YAML_DIFF_PRINT_BEFORE_PATCH=1
             ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1
@@ -367,8 +371,9 @@ jobs:
           #  CONTINUE_ON_INVALID_INPUT=1
           #  ENABLE_YAML_PRINT_AFTER_EDIT=1
           #  ENABLE_YAML_PRINT_AFTER_PATCH=1
-          #  ENABLE_YAML_PRINT_ALL=1                           # all `ENABLE_YAML_*PRINT*` variables
+          #  ENABLE_YAML_PRINT_ALL=1                                           # all `ENABLE_YAML_*PRINT*` variables
           #  ENABLE_YAML_PATCH_DIFF_PAUSE_MODE=1
+          #  DISABLE_YAML_EDIT_FORMAT_RESTORE_BY_DIFF_MERGE_WORKAROUND=1       # disable workaround: YAML edit format restore by diff merge
           #  NO_SKIP_UNEXPIRED_ENTRIES=1
           #  NO_DOWNLOAD_ENTRIES=1
           #  NO_DOWNLOAD_ENTRIES_AND_CREATE_EMPTY_INSTEAD=1
