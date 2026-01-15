@@ -1,3 +1,8 @@
+2026.01.15:
+* new: action.yml: `enable_yaml_print_all` action input variable to set `ENABLE_YAML_PRINT_ALL` environment variable if not set
+* changed: README.md: readme update
+* refactor: action.yml: minor refactor
+
 2025.02.03:
 * changed: README.md: github markdown blockquotes update
 * changed: README.md: repo links update

@@ -106,13 +106,14 @@ inputs:
     # examples:
     #   ENABLE_GENERATE_CHANGELOG_FILE=1
     #   CHANGELOG_FILE=repo/{{REPO_OWNER}}/{{REPO}}/content-changelog.txt
-    #   ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1            # insert the time string in format HH:MMZ additionally after the date in each commit message
-    #   ENABLE_COMMIT_MESSAGE_WITH_WORKFLOW_RUN_NUMBER=1  # insert the workflow run number after date/time prefix in each commit message
+    #   ENABLE_COMMIT_MESSAGE_DATE_WITH_TIME=1                            # insert the time string in format HH:MMZ additionally after the date in each commit message
+    #   ENABLE_COMMIT_MESSAGE_WITH_WORKFLOW_RUN_NUMBER=1                  # insert the workflow run number after date/time prefix in each commit message
     #   ENABLE_YAML_PRINT_AFTER_EDIT=1
     #   ENABLE_YAML_PRINT_AFTER_PATCH=1
     #   ENABLE_YAML_DIFF_PRINT_AFTER_EDIT=1
     #   ENABLE_YAML_DIFF_PRINT_BEFORE_PATCH=1
     #   ENABLE_YAML_PATCH_DIFF_PAUSE_MODE=1
+    #   ENABLE_YAML_PRINT_ALL=1                                           # all `ENABLE_YAML_*PRINT*` variables
     #   ENABLE_GITHUB_ACTIONS_RUN_URL_PRINT_TO_CHANGELOG=1
     #   ENABLE_REPO_STORE_COMMITS_URL_PRINT_TO_CHANGELOG=1
     #   CONTINUE_ON_INVALID_INPUT=1
@@ -249,6 +250,10 @@ runs:
         if (( ! NO_DOWNLOAD_ENTRIES )) && [[ "${{ github.event.inputs.no_download_entries }}" == 'true' || "${{ github.event.inputs.no_download_entries }}" -ne 0 ]]; then
           $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
             "NO_DOWNLOAD_ENTRIES=1"
+        fi
+        if (( ! ENABLE_YAML_PRINT_ALL )) && [[ "${{ github.event.inputs.enable_yaml_print_all }}" == 'true' || "${{ github.event.inputs.enable_yaml_print_all }}" -ne 0 ]]; then
+          $GH_WORKFLOW_ROOT/bash/github/set-env-from-args.sh \
+            "ENABLE_YAML_PRINT_ALL=1"
         fi
 
     - name: '[accum-content][11] declare local variables'

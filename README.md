@@ -310,6 +310,10 @@ on:
         description: 'Do not download entries'
         required: false
         default: 'false'
+      enable_yaml_print_all:
+        description: 'Enable YAML functions to print all'
+        required: false
+        default: 'false'
 
 jobs:
   accum-content-cache:
@@ -363,6 +367,7 @@ jobs:
           #  CONTINUE_ON_INVALID_INPUT=1
           #  ENABLE_YAML_PRINT_AFTER_EDIT=1
           #  ENABLE_YAML_PRINT_AFTER_PATCH=1
+          #  ENABLE_YAML_PRINT_ALL=1                           # all `ENABLE_YAML_*PRINT*` variables
           #  ENABLE_YAML_PATCH_DIFF_PAUSE_MODE=1
           #  NO_SKIP_UNEXPIRED_ENTRIES=1
           #  NO_DOWNLOAD_ENTRIES=1
