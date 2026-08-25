@@ -1,3 +1,6 @@
+2026.08.25:
+* changed: userlog.md: user log update
+
 2026.02.05:
 * changed: README.md: readme update
 
